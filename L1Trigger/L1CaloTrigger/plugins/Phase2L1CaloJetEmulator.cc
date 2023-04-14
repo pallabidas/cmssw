@@ -135,8 +135,8 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
 
       l1tp2::Phase2L1CaloJet tempJet;
       tempJet.setJetEt(jet[i].energy);
-      int gctjeteta = 3*jet[i].eta+1;
-      int gctjetphi = 3*jet[i].phi+1;
+      int gctjeteta = jet[i].etaCenter;
+      int gctjetphi = jet[i].phiCenter;
       tempJet.setJetIEta(gctjeteta+k*nTowerEta/2);
       tempJet.setJetIPhi(gctjetphi);
       float jeteta = realEta[gctjeteta+k*nTowerEta/2][gctjetphi];

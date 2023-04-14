@@ -16,6 +16,8 @@ class towerMax{
   float energyMax;
   int phiMax;
   int etaMax;
+  int phiCenter;
+  int etaCenter;
 
   towerMax(){
     energy = 0;
@@ -24,6 +26,8 @@ class towerMax{
     energyMax = 0;
     phiMax = 0;
     etaMax = 0;
+    phiCenter = 0;
+    etaCenter = 0;
   }
 
   towerMax& operator=(const towerMax& rhs){
@@ -33,6 +37,8 @@ class towerMax{
     energyMax = rhs.energyMax;
     phiMax = rhs.phiMax;
     etaMax = rhs.etaMax;
+    phiCenter = rhs.phiCenter;
+    etaCenter = rhs.etaCenter;
     return *this;
   }
 };
@@ -46,6 +52,8 @@ class jetInfo{
   float energyMax;
   int phiMax;
   int etaMax;
+  int phiCenter;
+  int etaCenter;
 
   jetInfo(){
     seedEnergy = 0;
@@ -55,6 +63,8 @@ class jetInfo{
     energyMax = 0;
     phiMax = 0;
     etaMax = 0;
+    phiCenter = 0;
+    etaCenter = 0;
   }
 
   jetInfo& operator=(const jetInfo& rhs){
@@ -65,6 +75,8 @@ class jetInfo{
     energyMax = rhs.energyMax;
     phiMax = rhs.phiMax;
     etaMax = rhs.etaMax;
+    phiCenter = rhs.phiCenter;
+    etaCenter = rhs.etaCenter;
     return *this;
   }
 };
@@ -76,6 +88,8 @@ typedef struct {
   float towerEt ;
   int towerEta ;
   int towerPhi ;
+  int centerEta ;
+  int centerPhi ;
 } GCTsupertower_t ;
 
 typedef struct {
@@ -106,6 +120,19 @@ int getPeakBinOf3(float et0, float et1, float et2) {
   else { x = 1; temp = et1; }
   if (et2 > temp) { x = 2; }
   return x;
+}
+
+int getEtCenterOf3(float et0, float et1, float et2) {
+  float etSum = et0 + et1 + et2;
+  float iEtSum = 0.5*et0 + 1.5*et1 + 2.5*et2;
+    //(et0 >> 1)                +  // 0.5xet[0]
+    //(et1 >> 1) + et1        +    // 1.5xet[1]
+    //(et2 >> 1) + (et2 << 1);     // 2.5xet[2]
+  int iAve = 0xEEF;
+  if (iEtSum <= etSum) iAve = 0;
+  else if (iEtSum <= 2*etSum) iAve = 1;
+  else  iAve = 2;
+  return iAve;
 }
 
 void makeST(const float GCTintTowers[nTowerEta/2][nTowerPhi], GCTsupertower_t supertower_return[nSTEta][nSTPhi]){
@@ -164,6 +191,10 @@ void makeST(const float GCTintTowers[nTowerEta/2][nTowerPhi], GCTsupertower_t su
       //float peakEt = ex_et[i*3+peakEta][j*3+1+peakPhi];
       float peakEt = ex_et[i*3+peakEta][j*3+peakPhi];
       temp.towerEt = peakEt;
+      int cEta = getEtCenterOf3(stripEta[i][j][0], stripEta[i][j][1], stripEta[i][j][2]);
+      temp.centerEta = cEta;
+      int cPhi = getEtCenterOf3(stripPhi[i][j][0], stripPhi[i][j][1], stripPhi[i][j][2]);
+      temp.centerPhi = cPhi;
       supertower_return[i][j] = temp;
 
       // DEBUG tower entries and peak position
@@ -225,12 +256,14 @@ towerMax getPeakBin6N(const etaStripPeak_t& etaStrip){
   
   GCTsupertower_t bestOf6 = bestOf2(best0123,best45) ;
   
-  x.energy = bestOf6.et ;
+  x.energy = bestOf6.et;
   x.phi = bestOf6.phi;
   x.eta = bestOf6.eta;
   x.energyMax = bestOf6.towerEt;
-  x.etaMax = bestOf6.towerEta ;
-  x.phiMax = bestOf6.towerPhi ;
+  x.etaMax = bestOf6.towerEta;
+  x.phiMax = bestOf6.towerPhi;
+  x.etaCenter = bestOf6.centerEta;
+  x.phiCenter = bestOf6.centerPhi;
   return x ;
 }
 
@@ -249,13 +282,15 @@ jetInfo getJetPosition(GCTsupertower_t temp[nSTEta][nSTPhi]){
   towerMax peakIn6;
   peakIn6 = getPeakBin6N(etaStripPeak);
 
-  jet.seedEnergy = peakIn6.energy ;
-  jet.energy = 0 ;
-  jet.eta = peakIn6.eta ;
-  jet.phi = peakIn6.phi ;
+  jet.seedEnergy = peakIn6.energy;
+  jet.energy = 0;
+  jet.eta = peakIn6.eta;
+  jet.phi = peakIn6.phi;
   jet.energyMax = peakIn6.energyMax;
   jet.etaMax = peakIn6.etaMax;
   jet.phiMax = peakIn6.phiMax;
+  jet.etaCenter = peakIn6.etaCenter;
+  jet.phiCenter = peakIn6.phiCenter;
   //std::cout<<jet.seedEnergy<<"\t"<<jet.energy<<"\t"<<jet.eta<<"\t"<<jet.phi<<"\t"<<jet.energyMax<<"\t"<<jet.etaMax<<"\t"<<jet.phiMax<<std::endl;
 
   return jet ;
@@ -264,6 +299,7 @@ jetInfo getJetPosition(GCTsupertower_t temp[nSTEta][nSTPhi]){
 jetInfo getJetValues(GCTsupertower_t tempX[nSTEta][nSTPhi], int seed_eta, int seed_phi ){
   float temp[nSTEta+2][nSTPhi+2] ;
   float eta_slice[3] ;
+  float phi_slice[3];
   jetInfo jet_tmp;
   //float debug[3][3];
 
@@ -280,6 +316,9 @@ jetInfo getJetValues(GCTsupertower_t tempX[nSTEta][nSTPhi], int seed_eta, int se
   }
 
   int seed_eta1,  seed_phi1 ;
+  int center_eta, center_phi;
+  center_eta = seed_eta;
+  center_phi = seed_phi;
 
   seed_eta1 = seed_eta ; //to start from corner
   seed_phi1 = seed_phi ; //to start from corner
@@ -302,18 +341,30 @@ jetInfo getJetValues(GCTsupertower_t tempX[nSTEta][nSTPhi], int seed_eta, int se
           tmp1 = temp[j+m][k] ;
           tmp2 = temp[j+m][k+1] ;
           tmp3 = temp[j+m][k+2] ;
-
           eta_slice[m] = tmp1 + tmp2 + tmp3 ;
+
+          tmp1 = temp[j][k+m] ;
+          tmp2 = temp[j+1][k+m] ;
+          tmp3 = temp[j+2][k+m] ;
+          phi_slice[m] = tmp1 + tmp2 + tmp3 ;
         }
+
+        center_eta = getEtCenterOf3(eta_slice[0], eta_slice[1], eta_slice[2]);
+        center_phi = getEtCenterOf3(phi_slice[0], phi_slice[1], phi_slice[2]);
       }
     }
   }
 
-  jet_tmp.energy=eta_slice[0] + eta_slice[1] + eta_slice[2] ;
+  jet_tmp.energy = eta_slice[0] + eta_slice[1] + eta_slice[2] ;
+  // To find the jet centre: note that seed supertower is always (1, 1)
+  jet_tmp.etaCenter = 3*(seed_eta - 1 + center_eta) + tempX[seed_eta - 1 + center_eta][seed_phi - 1 + center_phi].centerEta;
+  jet_tmp.phiCenter = 3*(seed_phi - 1 + center_phi) + tempX[seed_eta - 1 + center_eta][seed_phi - 1 + center_phi].centerPhi;
 
   // DEBUG jet energy and seed
   //std::cout<<"inside getJetValues:"<<std::endl;
   //std::cout<<debug[0][0]<<"\t"<<debug[0][1]<<"\t"<<debug[0][2]<<"\t"<<debug[1][0]<<"\t"<<debug[1][1]<<"\t"<<debug[1][2]<<"\t"<<debug[2][0]<<"\t"<<debug[2][1]<<"\t"<<debug[2][2]<<std::endl;
+  //std::cout<<"et weighted peak: "<<center_eta<<"\t"<<center_phi<<std::endl;
+  //std::cout<<"seed: "<<seed_eta<<"\t"<<seed_phi<<"\t"<<"center: "<<jet_tmp.etaCenter<<"\t"<<jet_tmp.phiCenter<<std::endl;
   //std::cout<<"seed: "<<tempX[seed_eta][seed_phi].et<<std::endl;
   //std::cout<<"total: "<<seed_eta<<"\t"<<seed_phi<<"\t"<<jet_tmp.energy<<std::endl;
 
@@ -336,6 +387,8 @@ jetInfo getRegion(GCTsupertower_t temp[nSTEta][nSTPhi]){
   int seed_eta = jet_tmp.eta ;
   jet = getJetValues(temp, seed_eta, seed_phi) ;
   jet_tmp.energy = jet.energy;
+  jet_tmp.etaCenter = jet.etaCenter;
+  jet_tmp.phiCenter = jet.phiCenter;
   return jet_tmp;
 }
 
