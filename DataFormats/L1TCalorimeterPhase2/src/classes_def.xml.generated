@@ -33,7 +33,8 @@
   <class name="edm::Wrapper<l1tp2::CaloPFClusterCollection>" />
 
   <class name="l1tp2::Phase2L1CaloJet"  ClassVersion="7">
-         <version ClassVersion="7" checksum="289384850"/>
+   <version ClassVersion="7" checksum="289384850"/>
+         <version ClassVersion="6" checksum="2152918872"/>
   </class>
   <class name="std::vector<l1tp2::Phase2L1CaloJet>" />
   <class name="l1tp2::Phase2L1CaloJetCollection" />

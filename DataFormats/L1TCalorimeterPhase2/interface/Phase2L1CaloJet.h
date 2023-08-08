@@ -15,6 +15,7 @@ namespace l1tp2 {
     Phase2L1CaloJet()
         : l1t::L1Candidate(),
           jetEt_(0.),
+          tauEt_(0.),
           jetIEta_(-99),
           jetIPhi_(-99),
           jetEta_(-99.),
@@ -27,6 +28,7 @@ namespace l1tp2 {
 
     Phase2L1CaloJet(const PolarLorentzVector& p4,
                   float jetEt,
+		  float tauEt,
                   int jetIEta,
                   int jetIPhi,
                   float jetEta,
@@ -38,6 +40,7 @@ namespace l1tp2 {
                   float towerPhi)
         : l1t::L1Candidate(p4),
           jetEt_(jetEt),
+          tauEt_(tauEt),
           jetIEta_(jetIEta),
           jetIPhi_(jetIPhi),
           jetEta_(jetEta),
@@ -49,6 +52,7 @@ namespace l1tp2 {
           towerPhi_(towerPhi){};
 
     inline float jetEt() const { return jetEt_; };
+    inline float tauEt() const { return tauEt_; };
     inline int jetIEta() const { return jetIEta_; };
     inline int jetIPhi() const { return jetIPhi_; };
     inline float jetEta() const { return jetEta_; };
@@ -60,6 +64,7 @@ namespace l1tp2 {
     inline float towerPhi() const { return towerPhi_; };
 
     void setJetEt(float jetEtIn) { jetEt_ = jetEtIn; };
+    void setTauEt(float tauEtIn) { tauEt_ = tauEtIn; };
     void setJetIEta(int jetIEtaIn) { jetIEta_ = jetIEtaIn; };
     void setJetIPhi(int jetIPhiIn) { jetIPhi_ = jetIPhiIn; };
     void setJetEta(float jetEtaIn) { jetEta_ = jetEtaIn; };
@@ -73,6 +78,8 @@ namespace l1tp2 {
   private:
     // ET
     float jetEt_;
+    // Tau ET
+    float tauEt_;
     // GCT ieta
     int jetIEta_;
     // GCT iphi
