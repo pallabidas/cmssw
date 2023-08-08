@@ -444,8 +444,14 @@ jetInfo getRegion(GCTsupertower_t temp[nSTEta][nSTPhi]){
   int seed_eta = jet_tmp.eta ;
   float seed_energy = jet_tmp.energyMax ;
   jet = getJetValues(temp, seed_eta, seed_phi) ;
-  if(seed_energy > 5.) jet_tmp.energy = jet.energy; // suppress <= 5 GeV ST as seed
-  else jet_tmp.energy = 0.;
+  if(seed_energy > 5.) {
+    jet_tmp.energy = jet.energy; // suppress <= 5 GeV ST as seed
+    jet_tmp.tauEt = jet.tauEt;
+  }
+  else {
+    jet_tmp.energy = 0.;
+    jet_tmp.tauEt = 0.;
+  }
   jet_tmp.etaCenter = jet.etaCenter; // this is the ET weighted eta centre of the ST
   jet_tmp.phiCenter = jet.phiCenter; // this is the ET weighted eta centre of the ST
   jet_tmp.etaMax = jet.etaMax; // this is the leading tower eta in the ST
