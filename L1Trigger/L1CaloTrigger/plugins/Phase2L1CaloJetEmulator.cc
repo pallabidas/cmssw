@@ -36,6 +36,10 @@
 #include "DataFormats/L1Trigger/interface/EGamma.h"
 #include "DataFormats/L1THGCal/interface/HGCalTower.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
+#include "SimDataFormats/CaloHit/interface/PCaloHitContainer.h"
+#include "CalibFormats/CaloTPG/interface/CaloTPGTranscoder.h"
+#include "CalibFormats/CaloTPG/interface/CaloTPGRecord.h"
+#include "L1Trigger/L1TCalorimeter/interface/CaloTools.h"
 
 #include <ap_int.h>
 #include <fstream>
@@ -61,6 +65,8 @@ private:
   // ----------member data ---------------------------
   edm::EDGetTokenT<l1tp2::CaloTowerCollection> caloTowerToken_;
   edm::EDGetTokenT<l1t::HGCalTowerBxCollection> hgcalTowerToken_;
+  edm::EDGetTokenT<HcalTrigPrimDigiCollection> hfToken_;
+  edm::ESGetToken<CaloTPGTranscoder, CaloTPGRecord> decoderTag_;
 };
 
 //
@@ -76,7 +82,9 @@ private:
 //
 Phase2L1CaloJetEmulator::Phase2L1CaloJetEmulator(const edm::ParameterSet& iConfig)
     : caloTowerToken_(consumes<l1tp2::CaloTowerCollection>(iConfig.getParameter<edm::InputTag>("gctFullTowers"))),
-      hgcalTowerToken_(consumes<l1t::HGCalTowerBxCollection>(iConfig.getParameter<edm::InputTag>("hgcalTowers"))) {
+      hgcalTowerToken_(consumes<l1t::HGCalTowerBxCollection>(iConfig.getParameter<edm::InputTag>("hgcalTowers"))),
+      hfToken_(consumes<HcalTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("hcalDigis"))),
+      decoderTag_(esConsumes<CaloTPGTranscoder, CaloTPGRecord>(edm::ESInputTag("", ""))) {
   produces<l1tp2::Phase2L1CaloJetCollection>("GCTJet");
 }
 
@@ -115,68 +123,6 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
   //Find 6 jets in each eta-half
 
   float temporary[nTowerEta/2][nTowerPhi];
-  vector<l1tp2::Phase2L1CaloJet> halfBarrelJets, halfHgcalJets;
-  halfBarrelJets.clear(); halfHgcalJets.clear();
-  vector<l1tp2::Phase2L1CaloJet> allJets;
-  allJets.clear();
-
-/*
-  for (int k = 0; k < 2; k++) {
-    for (int iphi = 0; iphi < nTowerPhi; iphi++) {
-      for (int ieta = 0; ieta < nTowerEta/2; ieta++) {
-        if(k == 0) temporary[ieta][iphi] = GCTintTowers[ieta][iphi];
-        else temporary[ieta][iphi] = GCTintTowers[nTowerEta/2 + ieta][iphi];
-        //std::cout<<ieta<<"\t"<<iphi<<"\t"<<GCTintTowers[ieta][iphi]<<std::endl;
-      }
-    }
-
-    GCTsupertower_t tempST[nSTEta][nSTPhi];
-    makeST(temporary, tempST);
-
-    jetInfo jet[10] ;
-    halfJets.clear();
-
-    for (int i = 0; i < 10; i++) {
-      jet[i] = getRegion(tempST);
-      //std::cout<<i<<" th jet energy: "<<jet[i].energy<<std::endl;
-
-      l1tp2::Phase2L1CaloJet tempJet;
-      tempJet.setJetEt(jet[i].energy);
-      int gctjeteta = jet[i].etaCenter;
-      int gctjetphi = jet[i].phiCenter;
-      tempJet.setJetIEta(gctjeteta+k*nTowerEta/2);
-      tempJet.setJetIPhi(gctjetphi);
-      float jeteta = realEta[gctjeteta+k*nTowerEta/2][gctjetphi];
-      float jetphi = realPhi[gctjeteta+k*nTowerEta/2][gctjetphi];
-      tempJet.setJetEta(jeteta);
-      tempJet.setJetPhi(jetphi);
-      tempJet.setTowerEt(jet[i].energyMax);
-      int gcttowereta = gctjeteta + jet[i].etaMax;
-      int gcttowerphi = gctjetphi + jet[i].phiMax;
-      tempJet.setTowerIEta(gcttowereta+k*nTowerEta/2);
-      tempJet.setTowerIPhi(gcttowerphi);
-      float towereta = realEta[gcttowereta+k*nTowerEta/2][gcttowerphi];
-      float towerphi = realPhi[gcttowereta+k*nTowerEta/2][gcttowerphi];
-      tempJet.setTowerEta(towereta);
-      tempJet.setTowerPhi(towerphi);
-      // add LorentzVector information
-      reco::Candidate::PolarLorentzVector tempJetp4;
-      tempJetp4.SetPt(tempJet.jetEt());
-      tempJetp4.SetEta(tempJet.jetEta());
-      tempJetp4.SetPhi(tempJet.jetPhi());
-      tempJetp4.SetM(0.);
-      tempJet.setP4(tempJetp4);
-
-      halfJets.push_back(tempJet);
-    }
-
-    // Sort the leading 10 jets and take 6
-    std::sort(halfJets.begin(), halfJets.end(), compareByEt);
-    for (int i = 0; i < 6; i++) {
-      allJets.push_back(halfJets.at(i));
-    }
-  }
-*/
 
   // HGCal info
   edm::Handle<l1t::HGCalTowerBxCollection> hgcalTowerCollection;
@@ -200,10 +146,11 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
   
   for (auto it = hgcalTowerColl.begin(0); it != hgcalTowerColl.end(0); it++) {
     float eta = it->eta();
-    int ieta = makeEndcapHwIEta(eta);
-    float phi = it->phi();
-    int iphi = makeEndcapHwIPhi(phi);
-    if(it->etEm() + it->etHad() > 1.) hgcalTowers[ieta][iphi] = it->etEm() + it->etHad(); // suppress 1 GeV towers
+    int ieta;
+    if(eta < 0) ieta = 17 - it->id().iEta();
+    else ieta = 18 + it->id().iEta();
+    int iphi = it->id().iPhi();
+    if(it->etEm() + it->etHad() > 1.) hgcalTowers[ieta][iphi] = it->etEm() + it->etHad(); // suppress <= 1 GeV towers
   }
 
   //Assign ETs to each eta-half of the endcap region (18x72)
@@ -212,10 +159,66 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
 
   float temporary_hgcal[nHgcalEta/2][nHgcalPhi];
 
+  // HF info
+  edm::Handle<HcalTrigPrimDigiCollection> hfHandle;
+  if (!iEvent.getByToken(hfToken_, hfHandle))
+    edm::LogError("Phase2L1CaloJetEmulator") << "Failed to get HcalTrigPrimDigi for HF!";
+  iEvent.getByToken(hfToken_, hfHandle);
+  float hfTowers[nHfEta][nHfPhi];
+  float hfEta[nHfEta][nHfPhi];
+  float hfPhi[nHfEta][nHfPhi];
+
+  for(int iphi = 0; iphi < nHfPhi; iphi++) {
+    for(int ieta = 0; ieta < nHfEta; ieta++) {
+      hfTowers[ieta][iphi] = 0;
+      int temp = ieta;
+      if(ieta < 12) temp = ieta - 41;
+      else temp = ieta - 12 + 30;
+      hfEta[ieta][iphi] = l1t::CaloTools::towerEta(temp);
+      hfPhi[ieta][iphi] = - M_PI + (iphi*M_PI/36) + (M_PI/72);
+      //hfPhi[ieta][iphi] = l1t::CaloTools::towerPhi(temp, iphi);
+      //std::cout<<hfEta[ieta][iphi]<<"\t"<<hfPhi[ieta][iphi]<<std::endl;
+    }
+  }
+
+  const auto& decoder = iSetup.getData(decoderTag_);
+  for (const auto& hit : *hfHandle.product()) {
+    double et = decoder.hcaletValue(hit.id(), hit.t0());
+    //std::cout<<hit.id().ieta()<<"\t"<<hit.id().iphi()<<"\t"<<et<<std::endl;
+    int ieta = 0;
+    if (abs(hit.id().ieta()) < l1t::CaloTools::kHFBegin) continue;
+    if (abs(hit.id().ieta()) > l1t::CaloTools::kHFEnd) continue;
+    if (hit.id().ieta() <= -30) {
+      ieta = hit.id().ieta() + 41;
+    }
+    else if (hit.id().ieta() >= 30) {
+      ieta = 12 + (hit.id().ieta() - 30);
+    }
+    //int iphi = hit.id().iphi();
+    int iphi = 0;
+    if (hit.id().iphi() <= 36) iphi = hit.id().iphi() + 35;
+    else if (hit.id().iphi() > 36) iphi = hit.id().iphi() - 37;
+    if(et > 1.) hfTowers[ieta][iphi] = et; // suppress <= 1 GeV towers
+  }
+
+  //Assign ETs to each eta-half of the endcap region (12x72)
+  //Then we create 4x24 super towers in each eta-half
+  //Find 6 jets in each eta-half
+
+  float temporary_hf[nHfEta/2][nHfPhi];
+
+  //Begin creating jets
+
+  vector<l1tp2::Phase2L1CaloJet> halfBarrelJets, halfHgcalJets, halfHfJets;
+  halfBarrelJets.clear(); halfHgcalJets.clear(); halfHfJets.clear();
+  vector<l1tp2::Phase2L1CaloJet> allJets;
+  allJets.clear();
+
   for (int k = 0; k < 2; k++) {
     halfBarrelJets.clear();
     halfHgcalJets.clear();
-    jetInfo jet[20] ;
+    halfHfJets.clear();
+    jetInfo jet[30] ;
 
     // BARREL
     for (int iphi = 0; iphi < nTowerPhi; iphi++) {
@@ -313,6 +316,55 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
       allJets.push_back(halfHgcalJets.at(i));
       if(i==5) break;
     }
+
+    // HF
+    for (int iphi = 0; iphi < nHfPhi; iphi++) {
+      for (int ieta = 0; ieta < nHfEta/2; ieta++) {
+        if(k == 0) temporary_hf[ieta][iphi] = hfTowers[ieta][iphi];
+        else temporary_hf[ieta][iphi] = hfTowers[nHfEta/2 + ieta][iphi];
+      }
+    }
+
+    GCTsupertower_t tempST_hf[nSTEta][nSTPhi];
+    makeST_hf(temporary_hf, tempST_hf);
+    for (int i = 20; i < 30; i++) {
+      jet[i] = getRegion(tempST_hf);
+      l1tp2::Phase2L1CaloJet tempJet;
+      tempJet.setJetEt(jet[i].energy);
+      tempJet.setTauEt(jet[i].tauEt);
+      int hfjeteta = jet[i].etaCenter;
+      int hfjetphi = jet[i].phiCenter;
+      tempJet.setJetIEta(hfjeteta+k*nHfEta/2);
+      tempJet.setJetIPhi(hfjetphi);
+      float jeteta = hfEta[hfjeteta+k*nHfEta/2][hfjetphi];
+      float jetphi = hfPhi[hfjeteta+k*nHfEta/2][hfjetphi];
+      tempJet.setJetEta(jeteta);
+      tempJet.setJetPhi(jetphi);
+      tempJet.setTowerEt(jet[i].energyMax);
+      int hftowereta = jet[i].etaMax;
+      int hftowerphi = jet[i].phiMax;
+      tempJet.setTowerIEta(hftowereta+k*nHfEta/2);
+      tempJet.setTowerIPhi(hftowerphi);
+      float towereta = hfEta[hftowereta+k*nHfEta/2][hftowerphi];
+      float towerphi = hfPhi[hftowereta+k*nHfEta/2][hftowerphi];
+      tempJet.setTowerEta(towereta);
+      tempJet.setTowerPhi(towerphi);
+      reco::Candidate::PolarLorentzVector tempJetp4;
+      tempJetp4.SetPt(tempJet.jetEt());
+      tempJetp4.SetEta(tempJet.jetEta());
+      tempJetp4.SetPhi(tempJet.jetPhi());
+      tempJetp4.SetM(0.);
+      tempJet.setP4(tempJetp4);
+
+      if(jet[i].energy > 0.) halfHfJets.push_back(tempJet);
+    }
+
+    std::sort(halfHfJets.begin(), halfHfJets.end(), compareByEt);
+    for (size_t i = 0; i < halfHfJets.size(); i++) {
+      allJets.push_back(halfHfJets.at(i));
+      if(i==5) break;
+    }
+
   }
 
   std::sort(allJets.begin(), allJets.end(), compareByEt);

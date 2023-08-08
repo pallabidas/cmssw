@@ -7,7 +7,10 @@ static constexpr int nTowerEta = 34;
 static constexpr int nTowerPhi = 72;
 static constexpr int nHgcalEta = 36;
 static constexpr int nHgcalPhi = 72;
+static constexpr int nHfEta = 24;
+static constexpr int nHfPhi = 72;
 static constexpr int nSTEta = 6;
+static constexpr int nSTEta_hf = 4;
 static constexpr int nSTPhi = 24;
 
 class towerMax{
@@ -240,6 +243,55 @@ void makeST_hgcal(const float hgcalTowers[nHgcalEta/2][nHgcalPhi], GCTsupertower
   }
 }
 
+void makeST_hf(const float hfTowers[nHfEta/2][nHfPhi], GCTsupertower_t supertower_return[nSTEta][nSTPhi]){
+  float et_sumEta[nSTEta][nSTPhi][3];
+  float stripEta[nSTEta][nSTPhi][3];
+  float stripPhi[nSTEta][nSTPhi][3];
+
+  int index_i = 0; // 5th and 6th ST to be set 0
+  int index_j = 0;
+  for(int i = 0; i < nHfEta/2; i += 3){ // 12 eta to 4 super towers
+    index_j = 0;
+    for(int j = 0; j < nHfPhi; j += 3){ // 72 phi to 24 super towers
+      stripEta[index_i][index_j][0] = hfTowers[i][j] + hfTowers[i][j+1] + hfTowers[i][j+2];
+      stripEta[index_i][index_j][1] = hfTowers[i+1][j] + hfTowers[i+1][j+1] + hfTowers[i+1][j+2];
+      stripEta[index_i][index_j][2] = hfTowers[i+2][j] + hfTowers[i+2][j+1] + hfTowers[i+2][j+2];
+      stripPhi[index_i][index_j][0] = hfTowers[i][j] + hfTowers[i+1][j] + hfTowers[i+2][j];
+      stripPhi[index_i][index_j][1] = hfTowers[i][j+1] + hfTowers[i+1][j+1] + hfTowers[i+2][j+1];
+      stripPhi[index_i][index_j][2] = hfTowers[i][j+2] + hfTowers[i+1][j+2] + hfTowers[i+2][j+2];
+      for(int k = 0; k < 3; k++){
+        et_sumEta[index_i][index_j][k] = hfTowers[i+k][j] + hfTowers[i+k][j+1] + hfTowers[i+k][j+2];
+      }
+      index_j++;
+    }
+    index_i++;
+  }
+
+  for(int i = 0; i < nSTEta; i++){
+    for(int j = 0; j < nSTPhi; j++){
+      GCTsupertower_t temp;
+      temp.et = 0; temp.eta = 0; temp.phi = 0; temp.towerEta = 0; temp.towerPhi = 0; temp.towerEt = 0; temp.centerEta = 0; temp.centerPhi = 0;
+      if(i < 4) {
+        float supertowerEt = et_sumEta[i][j][0] + et_sumEta[i][j][1] + et_sumEta[i][j][2];
+        temp.et = supertowerEt;
+        temp.eta = i;
+        temp.phi = j;
+        int peakEta = getPeakBinOf3(stripEta[i][j][0], stripEta[i][j][1], stripEta[i][j][2]);
+        temp.towerEta = peakEta;
+        int peakPhi = getPeakBinOf3(stripPhi[i][j][0], stripPhi[i][j][1], stripPhi[i][j][2]);
+        temp.towerPhi = peakPhi;
+        float peakEt = hfTowers[i*3+peakEta][j*3+peakPhi];
+        temp.towerEt = peakEt;
+        int cEta = getEtCenterOf3(stripEta[i][j][0], stripEta[i][j][1], stripEta[i][j][2]);
+        temp.centerEta = cEta;
+        int cPhi = getEtCenterOf3(stripPhi[i][j][0], stripPhi[i][j][1], stripPhi[i][j][2]);
+        temp.centerPhi = cPhi;
+      }
+      supertower_return[i][j] = temp;
+    }
+  }
+}
+
 GCTsupertower_t bestOf2(const GCTsupertower_t& calotp0, const GCTsupertower_t& calotp1) {
   GCTsupertower_t x;
   x = (calotp0.et > calotp1.et) ? calotp0 : calotp1;
@@ -367,8 +419,6 @@ jetInfo getJetValues(GCTsupertower_t tempX[nSTEta][nSTPhi], int seed_eta, int se
 
   jet_tmp.energy = eta_slice[0] + eta_slice[1] + eta_slice[2] ;
   jet_tmp.tauEt = temp[seed_eta1+1][seed_phi1+1]; //set tau Pt to be center ST energy
-  // jet_tmp.tauEt = eta_slice[1]; //set tau Pt to be sum of ST energies in center eta slice */
-  // jet_tmp.tauEt = eta_slice[1] + temp[seed_eta1][seed_phi1+1] + temp[seed_eta1+2][seed_phi1+1]; //set tau Pt to be sum of ST energies in center ST and adjacent STs */
   // To find the jet centre: note that seed supertower is always (1, 1)
   jet_tmp.etaCenter = 3*seed_eta + tempX[seed_eta][seed_phi].centerEta; //this is the ET weighted eta centre of the ST
   jet_tmp.phiCenter = 3*seed_phi + tempX[seed_eta][seed_phi].centerPhi; //this is the ET weighted phi centre of the ST
@@ -394,35 +444,14 @@ jetInfo getRegion(GCTsupertower_t temp[nSTEta][nSTPhi]){
   int seed_eta = jet_tmp.eta ;
   float seed_energy = jet_tmp.energyMax ;
   jet = getJetValues(temp, seed_eta, seed_phi) ;
-  if(seed_energy > 5.) {
-    jet_tmp.energy = jet.energy; // suppress <= 5 GeV ST as seed
-    jet_tmp.tauEt = jet.tauEt;
-  }
-  else {
-    jet_tmp.energy = 0.;
-    jet_tmp.tauEt = 0.;
-  }
+  if(seed_energy > 5.) jet_tmp.energy = jet.energy; // suppress <= 5 GeV ST as seed
+  else jet_tmp.energy = 0.;
   jet_tmp.etaCenter = jet.etaCenter; // this is the ET weighted eta centre of the ST
   jet_tmp.phiCenter = jet.phiCenter; // this is the ET weighted eta centre of the ST
   jet_tmp.etaMax = jet.etaMax; // this is the leading tower eta in the ST
   jet_tmp.phiMax = jet.phiMax; // this is the leading tower phi in the ST
   //std::cout<<"jet: "<<jet_tmp.energy<<"\t"<<seed_eta<<"\t"<<seed_phi<<"\t"<<jet_tmp.etaCenter<<"\t"<<jet_tmp.phiCenter<<"\t"<<jet_tmp.etaMax<<"\t"<<jet_tmp.phiMax<<std::endl;
   return jet_tmp;
-}
-
-int makeEndcapHwIEta(float eta) {
-  if (eta < 0) eta += 2.95775;
-  float IETAHGCAL_LSB = 0.0845;
-  int ieta = eta/IETAHGCAL_LSB;
-  return ieta;
-}
-
-int makeEndcapHwIPhi(float phi) {
-  phi += M_PI;
-  int INTPHI_PI = 36;
-  float IETAPHI_LSB = M_PI / INTPHI_PI;
-  int iphi = floor(phi/IETAPHI_LSB);
-  return iphi;
 }
 
 bool compareByEt (l1tp2::Phase2L1CaloJet i, l1tp2::Phase2L1CaloJet j) { return(i.jetEt() > j.jetEt()); };
