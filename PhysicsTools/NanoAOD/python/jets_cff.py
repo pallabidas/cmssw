@@ -471,10 +471,21 @@ fatJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         particleNet_H4qvsQCD = Var("bDiscriminator('pfParticleNetDiscriminatorsJetTags:H4qvsQCD')",float,doc="ParticleNet tagger H(->VV->qqqq) vs QCD discriminator",precision=10),
         particleNet_QCD = Var("bDiscriminator('pfParticleNetJetTags:probQCDbb')+bDiscriminator('pfParticleNetJetTags:probQCDcc')+bDiscriminator('pfParticleNetJetTags:probQCDb')+bDiscriminator('pfParticleNetJetTags:probQCDc')+bDiscriminator('pfParticleNetJetTags:probQCDothers')",float,doc="ParticleNet tagger QCD(bb,cc,b,c,others) sum",precision=10),
         particleNet_mass = Var("bDiscriminator('pfParticleNetMassRegressionJetTags:mass')",float,doc="ParticleNet mass regression",precision=10),
+        particleNet_massH_Hto4b = Var("bDiscriminator('pfParticleNetHto4bMassRegressionHJetTags:output')",float,doc="ParticleNet Higgs mass regression for H->aa->bbbb",precision=10),
+        particleNet_massA_Hto4b = Var("bDiscriminator('pfParticleNetHto4bMassRegressionAJetTags:output')",float,doc="ParticleNet a boson mass regression for H->aa->bbbb",precision=10),
         particleNetMD_Xbb = Var("bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probXbb')",float,doc="Mass-decorrelated ParticleNet tagger raw X->bb score. For X->bb vs QCD tagging, use Xbb/(Xbb+QCD)",precision=10),
         particleNetMD_Xcc = Var("bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probXcc')",float,doc="Mass-decorrelated ParticleNet tagger raw X->cc score. For X->cc vs QCD tagging, use Xcc/(Xcc+QCD)",precision=10),
         particleNetMD_Xqq = Var("bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probXqq')",float,doc="Mass-decorrelated ParticleNet tagger raw X->qq (uds) score. For X->qq vs QCD tagging, use Xqq/(Xqq+QCD). For W vs QCD tagging, use (Xcc+Xqq)/(Xcc+Xqq+QCD)",precision=10),
         particleNetMD_QCD = Var("bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probQCDbb')+bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probQCDcc')+bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probQCDb')+bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probQCDc')+bDiscriminator('pfMassDecorrelatedParticleNetJetTags:probQCDothers')",float,doc="Mass-decorrelated ParticleNet tagger raw QCD score",precision=10),
+        particleNetMD_Hto4b_Haa4b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probHaa4b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_Haa3b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probHaa3b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_Haa2b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probHaa2b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_Haa01b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probHaa01b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_QCD4b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probQCD4b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_QCD3b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probQCD3b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_QCD2b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probQCD2b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_QCD1b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probQCD1b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
+        particleNetMD_Hto4b_QCD0b = Var("bDiscriminator('pfMassDecorrelatedParticleNetHto4bJetTags:probQCD0b')",float,doc="Mass-decorrelated ParticleNet tagger for H->aa->bbbb",precision=10),
         subJetIdx1 = Var("?nSubjetCollections()>0 && subjets('SoftDropPuppi').size()>0?subjets('SoftDropPuppi')[0].key():-1", int,
 		     doc="index of first subjet"),
         subJetIdx2 = Var("?nSubjetCollections()>0 && subjets('SoftDropPuppi').size()>1?subjets('SoftDropPuppi')[1].key():-1", int,
@@ -493,6 +504,15 @@ fatJetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 ### Era dependent customization
 (run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(
     fatJetTable.variables, func=lambda v: delattr(v, 'particleNet_mass')
+)
+(run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(
+    fatJetTable.variables, func=lambda v: delattr(v, 'particleNet_massH_Hto4b')
+)
+(run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(
+    fatJetTable.variables, func=lambda v: delattr(v, 'particleNet_massA_Hto4b')
+)
+(run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(
+    fatJetTable.variables, func=lambda v: delattr(v, 'particleNet_Hto4b')
 )
 for modifier in run2_miniAOD_80XLegacy, run2_nanoAOD_94X2016, run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2, run2_nanoAOD_102Xv1, run2_nanoAOD_106Xv1:
   modifier.toModify( fatJetTable.variables.n2b1, expr = cms.string("userFloat('ak8PFJetsPuppiSoftDropValueMap:nb1AK8PuppiSoftDropN2')"),)
@@ -763,6 +783,7 @@ jetLepSequence = cms.Sequence(lepInJetVars)
 
 #after cross linkining
 jetTables = cms.Sequence(bjetNN+cjetNN+jetTable+fatJetTable+subJetTable+saJetTable+saTable)
+# jetTables = cms.Sequence(fatJetTable)  ## Only run AK8 jets for H->aa->4b - AWB 2023.08.31
 
 #MC only producers and tables
 jetMC = cms.Sequence(jetMCTable+genJetTable+patJetPartons+genJetFlavourTable+genJetAK8Table+genJetAK8FlavourAssociation+genJetAK8FlavourTable+fatJetMCTable+genSubJetAK8Table+subjetMCTable)

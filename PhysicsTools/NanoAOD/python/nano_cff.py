@@ -113,6 +113,7 @@ nanoSequenceCommon = cms.Sequence(
         linkedObjects  +
         jetTables + muonTables + tauTables + boostedTauTables + electronTables + lowPtElectronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + isoTrackTables
         )
+        # jetTables + boostedTauTables + simpleCleanerTable )
 #remove boosted tau from previous eras
 (run2_miniAOD_80XLegacy | run2_nanoAOD_92X | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1 | run2_nanoAOD_106Xv1).toReplaceWith(nanoSequenceCommon, nanoSequenceCommon.copyAndExclude([boostedTauSequence, boostedTauTables]))
 
@@ -309,8 +310,8 @@ def nanoAOD_addDeepInfoAK8(process, addDeepBTag, addDeepBoostedJet, addDeepDoubl
         from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
         _btagDiscriminators += pfParticleNetJetTagsAll
     if addParticleNetMass:
-        from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetMassRegressionOutputs
-        _btagDiscriminators += _pfParticleNetMassRegressionOutputs
+        from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetMassRegressionAll as pfParticleNetMassRegressionAll
+        _btagDiscriminators += pfParticleNetMassRegressionAll
     if addDeepDoubleX:
         print("Updating process to run DeepDoubleX on datasets before 104X")
         _btagDiscriminators += ['pfDeepDoubleBvLJetTags:probHbb', \
@@ -388,14 +389,14 @@ def nanoAOD_customizeCommon(process):
     # Don't rerun where already present
     (run2_miniAOD_devel).toModify(
         nanoAOD_addDeepInfoAK8_switch,
-        nanoAOD_addParticleNetMass_switch = False,
+        # nanoAOD_addParticleNetMass_switch = False,
         )
     (run2_nanoAOD_106Xv2 | run2_miniAOD_devel).toModify(
         nanoAOD_addDeepInfoAK8_switch,
         nanoAOD_addDeepBoostedJet_switch = False,
         nanoAOD_addDeepDoubleX_switch = False,
         nanoAOD_addDeepDoubleXV2_switch = False,
-        nanoAOD_addParticleNet_switch = False,
+        # nanoAOD_addParticleNet_switch = False,
         )
     run2_nanoAOD_106Xv1.toModify(
          nanoAOD_addDeepInfoAK8_switch,
@@ -405,7 +406,7 @@ def nanoAOD_customizeCommon(process):
     # no-change policy
     (run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(
         nanoAOD_addDeepInfoAK8_switch,
-        nanoAOD_addParticleNetMass_switch = False,
+        # nanoAOD_addParticleNetMass_switch = False,
         )
     process = nanoAOD_addDeepInfoAK8(process,
                                      addDeepBTag=nanoAOD_addDeepInfoAK8_switch.nanoAOD_addDeepBTag_switch,
@@ -441,6 +442,17 @@ def nanoAOD_customizeMC(process):
     process = nanoAOD_recalibrateMETs(process,isData=False)
     for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
         modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=False))
+    return process
+
+def nanoAOD_customizeHto4b(process):
+    process = nanoAOD_addDeepInfoAK8(process,
+                                     addDeepBTag=cms.untracked.bool(False),
+                                     addDeepBoostedJet=cms.untracked.bool(False),
+                                     addDeepDoubleX=cms.untracked.bool(False),
+                                     addDeepDoubleXV2=cms.untracked.bool(False),
+                                     addParticleNet=cms.untracked.bool(True),
+                                     addParticleNetMass=cms.untracked.bool(True),
+                                     jecPayload=cms.untracked.string('AK8PFPuppi'))
     return process
 
 def nanoWmassGenCustomize(process):

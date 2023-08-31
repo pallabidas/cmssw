@@ -251,9 +251,13 @@ for disc in _pfMassDecorrelatedDeepBoostedJetTagsMetaDiscrs:
 # setup ParticleNet AK8
 from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsProbs, _pfParticleNetJetTagsMetaDiscrs, \
     _pfMassDecorrelatedParticleNetJetTagsProbs, _pfMassDecorrelatedParticleNetJetTagsMetaDiscrs, \
-    _pfParticleNetMassRegressionOutputs
+    _pfMassDecorrelatedParticleNetHto4bJetTagsProbs, \
+    _pfParticleNetMassRegressionOutputs, \
+    _pfParticleNetHto4bMassRegressionHOutputs, _pfParticleNetHto4bMassRegressionAOutputs
 # update supportedBtagDiscr
-for disc in _pfParticleNetJetTagsProbs + _pfMassDecorrelatedParticleNetJetTagsProbs + _pfParticleNetMassRegressionOutputs:
+for disc in _pfParticleNetJetTagsProbs + _pfMassDecorrelatedParticleNetJetTagsProbs + _pfParticleNetMassRegressionOutputs + \
+    _pfMassDecorrelatedParticleNetHto4bJetTagsProbs + \
+    _pfParticleNetHto4bMassRegressionHOutputs + _pfParticleNetHto4bMassRegressionAOutputs:
     supportedBtagDiscr[disc] = [["pfParticleNetTagInfos"]]
 # update supportedMetaDiscr
 for disc in _pfParticleNetJetTagsMetaDiscrs:

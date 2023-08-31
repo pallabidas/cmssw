@@ -108,7 +108,10 @@ for plot in _sv_plots_nom:
 (run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(nanoDQM.vplots.SV, plots = _sv_plots_106Xv1 )
 
 (run2_nanoAOD_106Xv1 & ~run2_nanoAOD_devel).toModify(nanoDQM.vplots.FatJet, plots=cms.VPSet(
-    v for v in nanoDQM.vplots.FatJet.plots if v.name.value() != 'particleNet_mass'))
+    v for v in nanoDQM.vplots.FatJet.plots if (v.name.value() != 'particleNet_mass' and
+                                               v.name.value() != 'particleNet_massH_Hto4b' and
+                                               v.name.value() != 'particleNet_massA_Hto4b' and
+                                               v.name.value() != 'particleNet_Hto4b')))
 
 _Jet_plots_nom = copy.deepcopy(nanoDQM.vplots.Jet.plots)
 _Jet_plots_106Xv1 = cms.VPSet()
