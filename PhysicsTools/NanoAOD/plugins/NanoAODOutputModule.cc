@@ -67,6 +67,7 @@ private:
   bool m_writeProvenance;
   bool m_fakeName; //crab workaround, remove after crab is fixed
   int m_autoFlush;
+  bool m_writeTriggerBranches;
   edm::ProcessHistoryRegistry m_processHistoryRegistry;
   edm::JobReport::Token m_jrToken;
   std::unique_ptr<TFile> m_file;
@@ -149,6 +150,7 @@ NanoAODOutputModule::NanoAODOutputModule(edm::ParameterSet const& pset):
   m_writeProvenance(pset.getUntrackedParameter<bool>("saveProvenance", true)),
   m_fakeName(pset.getUntrackedParameter<bool>("fakeNameForCrab", false)),
   m_autoFlush(pset.getUntrackedParameter<int>("autoFlush", -10000000)),
+  m_writeTriggerBranches(pset.getUntrackedParameter<bool>("writeTriggerBranches", true)),
   m_processHistoryRegistry()
 {
 }
@@ -212,7 +214,9 @@ NanoAODOutputModule::write(edm::EventForOutput const& iEvent) {
     m_triggers_areSorted = true;
   }
   // fill triggers
-  for (auto & t : m_triggers) t.fill(iEvent,*m_tree);
+  if (m_writeTriggerBranches) {
+    for (auto & t : m_triggers) t.fill(iEvent,*m_tree);
+  }
   // fill event branches
   for (auto & t : m_evstrings) t.fill(iEvent,*m_tree);
   m_tree->Fill();
@@ -388,6 +392,8 @@ NanoAODOutputModule::fillDescriptions(edm::ConfigurationDescriptions& descriptio
         ->setComment("Change the OutputModule name in the fwk job report to fake PoolOutputModule. This is needed to run on cran (and publish) till crab is fixed");
   desc.addUntracked<int>("autoFlush", -10000000)
         ->setComment("Autoflush parameter for ROOT file");
+  desc.addUntracked<bool>("writeTriggerBranches", true)
+        ->setComment("Writes L1 and HLT trigger path decisions to NanoAOD output tree");
 
   //replace with whatever you want to get from the EDM by default
   const std::vector<std::string> keep = {"drop *", "keep nanoaodFlatTable_*Table_*_*", "keep edmTriggerResults_*_*_*", "keep String_*_genModel_*", "keep nanoaodMergeableCounterTable_*Table_*_*", "keep nanoaodUniqueString_nanoMetadata_*_*"};
