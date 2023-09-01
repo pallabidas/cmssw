@@ -113,7 +113,6 @@ nanoSequenceCommon = cms.Sequence(
         linkedObjects  +
         jetTables + muonTables + tauTables + boostedTauTables + electronTables + lowPtElectronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + isoTrackTables
         )
-        # jetTables + boostedTauTables + simpleCleanerTable )
 #remove boosted tau from previous eras
 (run2_miniAOD_80XLegacy | run2_nanoAOD_92X | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1 | run2_nanoAOD_106Xv1).toReplaceWith(nanoSequenceCommon, nanoSequenceCommon.copyAndExclude([boostedTauSequence, boostedTauTables]))
 
@@ -442,17 +441,6 @@ def nanoAOD_customizeMC(process):
     process = nanoAOD_recalibrateMETs(process,isData=False)
     for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
         modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=False))
-    return process
-
-def nanoAOD_customizeHto4b(process):
-    process = nanoAOD_addDeepInfoAK8(process,
-                                     addDeepBTag=cms.untracked.bool(False),
-                                     addDeepBoostedJet=cms.untracked.bool(False),
-                                     addDeepDoubleX=cms.untracked.bool(False),
-                                     addDeepDoubleXV2=cms.untracked.bool(False),
-                                     addParticleNet=cms.untracked.bool(True),
-                                     addParticleNetMass=cms.untracked.bool(True),
-                                     jecPayload=cms.untracked.string('AK8PFPuppi'))
     return process
 
 def nanoWmassGenCustomize(process):
