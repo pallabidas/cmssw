@@ -2,7 +2,7 @@ from __future__ import print_function
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.NanoAOD.nano_eras_cff import *
-from PhysicsTools.NanoAOD.jets_cff import *
+from PhysicsTools.NanoAOD.jets_addHto4b_cff import *
 from PhysicsTools.NanoAOD.muons_cff import *
 from PhysicsTools.NanoAOD.taus_cff import *
 from PhysicsTools.NanoAOD.boostedTaus_cff import *
