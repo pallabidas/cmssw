@@ -29,8 +29,8 @@ pfMassDecorrelatedParticleNetJetTags = boostedJetONNXJetTagsProducer.clone(
 # pfMassDecorrelatedParticleNetHto4bJetTags = pfMassDecorrelatedParticleNetJetTags
 pfMassDecorrelatedParticleNetHto4bJetTags = boostedJetONNXJetTagsProducer.clone(
     src = 'pfParticleNetTagInfos',
-    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/MD-Hto4b/V01/preprocess_multiclass_wH-70_E02_AWB_2023_08_31_v12.json',
-    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/MD-Hto4b/V01/multiclass_wH-70_E02_AWB_2023_08_31_v12.onnx',
+    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/MD-Hto4b/V01/preprocess_multiclass_wH-70_E30_AWB_2023_08_31_v12.json',
+    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/MD-Hto4b/V01/multiclass_wH-70_E30_AWB_2023_08_31_v12.onnx',
     flav_names = ["probHaa4b", "probHaa3b", "probHaa2b", "probHaa01b",
                   "probQCD4b", "probQCD3b", "probQCD2b", "probQCD1b", "probQCD0b"],
 )
