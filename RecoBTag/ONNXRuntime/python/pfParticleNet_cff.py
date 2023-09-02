@@ -51,8 +51,8 @@ pfParticleNetHto4bMassRegressionHJetTags = boostedJetONNXJetTagsProducer.clone(
 
 pfParticleNetHto4bMassRegressionAJetTags = boostedJetONNXJetTagsProducer.clone(
     src = 'pfParticleNetTagInfos',
-    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/preprocess_wide_H_calc_mass_regr_Si_2023_08_30_v12.json',
-    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/wide_H_calc_mass_regr_Si_2023_08_30_v12.onnx',
+    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionA/V01/preprocess_MA-regr_mH-125_E40_AWB_2023_08_31_v12.json',
+    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionA/V01/MA-regr_mH-125_E40_AWB_2023_08_31_v12.onnx',
     flav_names = ["output"],
 )
 
