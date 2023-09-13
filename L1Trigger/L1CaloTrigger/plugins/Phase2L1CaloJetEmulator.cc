@@ -263,12 +263,6 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
       if(jet[i].energy > 0.) halfBarrelJets.push_back(tempJet);
     }
 
-    std::sort(halfBarrelJets.begin(), halfBarrelJets.end(), compareByEt);
-    for (size_t i = 0; i < halfBarrelJets.size(); i++) {
-      allJets.push_back(halfBarrelJets.at(i));
-      if(i==5) break;
-    }
-
     // ENDCAP
     for (int iphi = 0; iphi < nHgcalPhi; iphi++) {
       for (int ieta = 0; ieta < nHgcalEta/2; ieta++) {
@@ -309,12 +303,6 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
       tempJet.setP4(tempJetp4);
 
       if(jet[i].energy > 0.) halfHgcalJets.push_back(tempJet);
-    }
-
-    std::sort(halfHgcalJets.begin(), halfHgcalJets.end(), compareByEt);
-    for (size_t i = 0; i < halfHgcalJets.size(); i++) {
-      allJets.push_back(halfHgcalJets.at(i));
-      if(i==5) break;
     }
 
     // HF
@@ -359,10 +347,95 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
       if(jet[i].energy > 0.) halfHfJets.push_back(tempJet);
     }
 
+    // Stitching:
+    // if the jet eta is at the boundary: for HB it should be within 0-1 in -ve eta, 32-33 in +ve eta; for HE it should be within 0-1/16-17 in -ve eta, 34-35/18-19 in +ve eta; for HF it should be within 10-11 in -ve eta, 12-13 in +ve eta
+    // then get the phi of that jet and check if there is a neighbouring jet with the same phi, then merge to the jet that has higher ET
+    // in both eta/phi allow a maximum of one tower between jet centers for stitching
+
+    for (size_t i = 0; i < halfHgcalJets.size(); i++) {
+      if (halfHgcalJets.at(i).jetIEta() > 15 && halfHgcalJets.at(i).jetIEta() < 20) {
+        float hgcal_ieta = k*nTowerEta + halfHgcalJets.at(i).jetIEta();
+        for (size_t j = 0; j < halfBarrelJets.size(); j++) {
+          float barrel_ieta = nHgcalEta/2 + halfBarrelJets.at(j).jetIEta();
+          if (abs(barrel_ieta - hgcal_ieta) < 3 && abs(halfBarrelJets.at(j).jetIPhi() - halfHgcalJets.at(i).jetIPhi()) < 3) {
+            float totalet = halfBarrelJets.at(j).jetEt() + halfHgcalJets.at(i).jetEt();
+            float totalTauEt = halfBarrelJets.at(j).tauEt() + halfHgcalJets.at(i).tauEt();
+            if (halfBarrelJets.at(j).jetEt() > halfHgcalJets.at(i).jetEt()) {
+              halfHgcalJets.at(i).setJetEt(0.);
+              halfHgcalJets.at(i).setTauEt(0.);
+              halfBarrelJets.at(j).setJetEt(totalet);
+              halfBarrelJets.at(j).setTauEt(totalTauEt);
+              reco::Candidate::PolarLorentzVector tempJetp4;
+              tempJetp4.SetPt(totalet);
+              tempJetp4.SetEta(halfBarrelJets.at(j).jetEta());
+              tempJetp4.SetPhi(halfBarrelJets.at(j).jetPhi());
+              tempJetp4.SetM(0.);
+              halfBarrelJets.at(j).setP4(tempJetp4);
+            }
+            else {
+              halfHgcalJets.at(i).setJetEt(totalet);
+              halfHgcalJets.at(i).setTauEt(totalTauEt);
+              halfBarrelJets.at(j).setJetEt(0.);
+              halfBarrelJets.at(j).setTauEt(0.);
+              reco::Candidate::PolarLorentzVector tempJetp4;
+              tempJetp4.SetPt(totalet);
+              tempJetp4.SetEta(halfHgcalJets.at(i).jetEta());
+              tempJetp4.SetPhi(halfHgcalJets.at(i).jetPhi());
+              tempJetp4.SetM(0.);
+              halfHgcalJets.at(i).setP4(tempJetp4);
+            }
+          }
+        }
+      }
+      else if (halfHgcalJets.at(i).jetIEta() < 2 || halfHgcalJets.at(i).jetIEta() > 33) {
+        float hgcal_ieta = k*nTowerEta + nHfEta/2 + halfHgcalJets.at(i).jetIEta();
+        for (size_t j = 0; j < halfHfJets.size(); j++) {
+          float hf_ieta = k*nTowerEta + k*nHgcalEta + halfHfJets.at(j).jetIEta();
+          if(abs(hgcal_ieta - hf_ieta) < 3 && abs(halfHfJets.at(j).jetIPhi() - halfHgcalJets.at(i).jetIPhi()) < 3) {
+            float totalet = halfHfJets.at(j).jetEt() + halfHgcalJets.at(i).jetEt();
+            float totalTauEt = halfHfJets.at(j).tauEt() + halfHgcalJets.at(i).tauEt();
+            if (halfHfJets.at(j).jetEt() > halfHgcalJets.at(i).jetEt()) {
+              halfHgcalJets.at(i).setJetEt(0.);
+              halfHgcalJets.at(i).setTauEt(0.);
+              halfHfJets.at(j).setJetEt(totalet);
+              halfHfJets.at(j).setTauEt(totalTauEt);
+              reco::Candidate::PolarLorentzVector tempJetp4;
+              tempJetp4.SetPt(totalet);
+              tempJetp4.SetEta(halfHfJets.at(j).jetEta());
+              tempJetp4.SetPhi(halfHfJets.at(j).jetPhi());
+              tempJetp4.SetM(0.);
+              halfHfJets.at(j).setP4(tempJetp4);
+            }
+            else {
+              halfHgcalJets.at(i).setJetEt(totalet);
+              halfHgcalJets.at(i).setTauEt(totalTauEt);
+              halfHfJets.at(j).setJetEt(0.);
+              halfHfJets.at(j).setTauEt(0.);
+              reco::Candidate::PolarLorentzVector tempJetp4;
+              tempJetp4.SetPt(totalet);
+              tempJetp4.SetEta(halfHgcalJets.at(i).jetEta());
+              tempJetp4.SetPhi(halfHgcalJets.at(i).jetPhi());
+              tempJetp4.SetM(0.);
+              halfHgcalJets.at(i).setP4(tempJetp4);
+            }
+          }
+        }
+      }
+    }
+
+    std::sort(halfBarrelJets.begin(), halfBarrelJets.end(), compareByEt);
+    for (size_t i = 0; i < halfBarrelJets.size(); i++) {
+      if (halfBarrelJets.at(i).jetEt() > 0. && i < 6) allJets.push_back(halfBarrelJets.at(i));
+    }
+
+    std::sort(halfHgcalJets.begin(), halfHgcalJets.end(), compareByEt);
+    for (size_t i = 0; i < halfHgcalJets.size(); i++) {
+      if (halfHgcalJets.at(i).jetEt() > 0. && i < 6) allJets.push_back(halfHgcalJets.at(i));
+    }
+
     std::sort(halfHfJets.begin(), halfHfJets.end(), compareByEt);
     for (size_t i = 0; i < halfHfJets.size(); i++) {
-      allJets.push_back(halfHfJets.at(i));
-      if(i==5) break;
+      if (halfHfJets.at(i).jetEt() > 0. && i < 6) allJets.push_back(halfHfJets.at(i));
     }
 
   }

@@ -418,7 +418,9 @@ jetInfo getJetValues(GCTsupertower_t tempX[nSTEta][nSTPhi], int seed_eta, int se
   }
 
   jet_tmp.energy = eta_slice[0] + eta_slice[1] + eta_slice[2] ;
-  jet_tmp.tauEt = temp[seed_eta1+1][seed_phi1+1]; //set tau Pt to be center ST energy
+  //jet_tmp.tauEt = temp[seed_eta1+1][seed_phi1+1]; //set tau Pt to be center ST energy
+  //jet_tmp.tauEt = eta_slice[1]; //set tau Pt to be sum of ST energies in center eta slice 
+  jet_tmp.tauEt = eta_slice[1] + temp[seed_eta1][seed_phi1+1] + temp[seed_eta1+2][seed_phi1+1]; //set tau Pt to be sum of ST energies in center ST and adjacent STs 
   // To find the jet centre: note that seed supertower is always (1, 1)
   jet_tmp.etaCenter = 3*seed_eta + tempX[seed_eta][seed_phi].centerEta; //this is the ET weighted eta centre of the ST
   jet_tmp.phiCenter = 3*seed_phi + tempX[seed_eta][seed_phi].centerPhi; //this is the ET weighted phi centre of the ST
