@@ -30,9 +30,10 @@ def nanoAOD_addDeepInfoAK8(process):
                              ['pfParticleNetDiscriminatorsJetTags:H4qvsQCD']  + \
                              Hto4bTags )
 
-    from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetHto4bMassRegressionHOutputs as Hto4bMassH
-    from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetHto4bMassRegressionAOutputs as Hto4bMassA
-    _btagDiscriminators += ( ['pfParticleNetMassRegressionJetTags:mass'] + Hto4bMassH + Hto4bMassA )
+    from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetHto4bMassRegressionOutputs as Hto4bMass
+
+    _btagDiscriminators += ( ['pfParticleNetMassRegressionJetTags:mass'] + \
+                             Hto4bMass )
 
     if len(_btagDiscriminators)==0: return process
     print("Will recalculate the following discriminators on AK8 jets: "+", ".join(_btagDiscriminators))

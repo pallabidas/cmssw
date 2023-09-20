@@ -736,9 +736,8 @@ def setupBTagging(process, jetSource, pfCandidates, explicitJTA, pvSource, svSou
             print('  --> %s ignored, since not available via RecoBTag.Configuration.RecoBTag_cff!'%(btagInfo))
     ## setup all required btagDiscriminators
     acceptedBtagDiscriminators = list()
-    for discriminator_name in btagDiscriminators :			
+    for discriminator_name in btagDiscriminators:
         btagDiscr = discriminator_name.split(':')[0] #split input tag to get the producer label
-        #print discriminator_name, '-->', btagDiscr
         if hasattr(btag,btagDiscr): 
             newDiscr = btagPrefix+btagDiscr+labelName+postfix #new discriminator name
             if hasattr(process, newDiscr):
@@ -772,7 +771,6 @@ def setupBTagging(process, jetSource, pfCandidates, explicitJTA, pvSource, svSou
     #update meta-taggers, if any
     for meta_tagger in present_meta:
         btagDiscr = meta_tagger.split(':')[0] #split input tag to get the producer label
-        #print discriminator_name, '-->', btagDiscr
         if hasattr(btag,btagDiscr): 
             newDiscr = btagPrefix+btagDiscr+labelName+postfix #new discriminator name
             if hasattr(process, newDiscr):

@@ -253,11 +253,13 @@ from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsProbs, _
     _pfMassDecorrelatedParticleNetJetTagsProbs, _pfMassDecorrelatedParticleNetJetTagsMetaDiscrs, \
     _pfMassDecorrelatedParticleNetHto4bJetTagsProbs, \
     _pfParticleNetMassRegressionOutputs, \
-    _pfParticleNetHto4bMassRegressionHOutputs, _pfParticleNetHto4bMassRegressionAOutputs
+    _pfParticleNetHto4bMassRegressionOutputs
+
 # update supportedBtagDiscr
 for disc in _pfParticleNetJetTagsProbs + _pfMassDecorrelatedParticleNetJetTagsProbs + _pfParticleNetMassRegressionOutputs + \
     _pfMassDecorrelatedParticleNetHto4bJetTagsProbs + \
-    _pfParticleNetHto4bMassRegressionHOutputs + _pfParticleNetHto4bMassRegressionAOutputs:
+    _pfParticleNetHto4bMassRegressionOutputs:
+
     supportedBtagDiscr[disc] = [["pfParticleNetTagInfos"]]
 # update supportedMetaDiscr
 for disc in _pfParticleNetJetTagsMetaDiscrs:
