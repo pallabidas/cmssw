@@ -309,8 +309,8 @@ def nanoAOD_addDeepInfoAK8(process, addDeepBTag, addDeepBoostedJet, addDeepDoubl
         from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
         _btagDiscriminators += pfParticleNetJetTagsAll
     if addParticleNetMass:
-        from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetMassRegressionAll as pfParticleNetMassRegressionAll
-        _btagDiscriminators += pfParticleNetMassRegressionAll
+        from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetMassRegressionOutputs
+        _btagDiscriminators += _pfParticleNetMassRegressionOutputs
     if addDeepDoubleX:
         print("Updating process to run DeepDoubleX on datasets before 104X")
         _btagDiscriminators += ['pfDeepDoubleBvLJetTags:probHbb', \
@@ -324,6 +324,13 @@ def nanoAOD_addDeepInfoAK8(process, addDeepBTag, addDeepBoostedJet, addDeepDoubl
             'pfMassIndependentDeepDoubleCvLV2JetTags:probHcc',
             'pfMassIndependentDeepDoubleCvBV2JetTags:probHcc'
             ]
+    if True:
+        print("\n*** Updating process to re-run ParticleNet before it's included in MiniAOD ***\n")
+        from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfMassDecorrelatedParticleNetHto4bJetTagsProbs as Hto4bTags
+        _btagDiscriminators += ( Hto4bTags )
+        from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetHto4bMassRegressionOutputs as Hto4bMass
+        _btagDiscriminators += ( Hto4bMass )
+
     if len(_btagDiscriminators)==0: return process
     print("Will recalculate the following discriminators on AK8 jets: "+", ".join(_btagDiscriminators))
     updateJetCollection(
@@ -417,12 +424,11 @@ def nanoAOD_customizeCommon(process):
                                      jecPayload=nanoAOD_addDeepInfoAK8_switch.jecPayload)
     addTauIds_switch = cms.PSet(
         nanoAOD_addTauIds_switch = cms.untracked.bool(True),
-        nanoAOD_addBoostedTauIds_switch = cms.untracked.bool(False)
+        nanoAOD_addBoostedTauIds_switch = cms.untracked.bool(True)
     )
-    run2_miniAOD_80XLegacy.toModify(addTauIds_switch, nanoAOD_addTauIds_switch = False)
     ((run2_nanoAOD_106Xv2 | run2_miniAOD_devel | run2_tau_ul_2016 | run2_tau_ul_2018) & \
-    (~(run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1 | run2_nanoAOD_106Xv1))).toModify(addTauIds_switch,
-                                                                                                                                           nanoAOD_addTauIds_switch = False, nanoAOD_addBoostedTauIds_switch = True)
+    (~(run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1 | run2_nanoAOD_106Xv1))).toModify(addTauIds_switch, nanoAOD_addTauIds_switch = False)
+    (run2_miniAOD_80XLegacy | run2_nanoAOD_92X | run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1 | run2_nanoAOD_106Xv1).toModify(addTauIds_switch, nanoAOD_addBoostedTauIds_switch = False)
     if addTauIds_switch.nanoAOD_addTauIds_switch:
         process = nanoAOD_addTauIds(process)
     if addTauIds_switch.nanoAOD_addBoostedTauIds_switch:

@@ -125,18 +125,6 @@ from PhysicsTools.PatAlgos.slimming.primaryVertexAssociation_cfi import primaryV
 # This task is not used, useful only if we run it from RECO jets (RECO/AOD)
 pfParticleNetTask = cms.Task(puppi, primaryVertexAssociation, pfParticleNetTagInfos,
                              pfParticleNetJetTags, pfMassDecorrelatedParticleNetJetTags, pfParticleNetMassRegressionJetTags,
-                             pfMassDecorrelatedParticleNetHto4bMJetTags,
-                             pfMassDecorrelatedParticleNetHto4bB1JetTags,
-                             pfMassDecorrelatedParticleNetHto4bB2JetTags,
-                             pfParticleNetHto4bMassRegressionH0JetTags,
-                             pfParticleNetHto4bMassRegressionH1JetTags,
-                             pfParticleNetHto4bMassRegressionH2JetTags,
-                             pfParticleNetHto4bMassRegressionH3JetTags,
-                             pfParticleNetHto4bMassRegressionH4JetTags,
-                             pfParticleNetHto4bMassRegressionA1JetTags,
-                             pfParticleNetHto4bMassRegressionA2JetTags,
-                             pfParticleNetHto4bMassRegressionA3JetTags,
-                             pfParticleNetHto4bMassRegressionA4JetTags,
                              pfParticleNetDiscriminatorsJetTags, pfMassDecorrelatedParticleNetDiscriminatorsJetTags)
 
 # declare all the discriminators
@@ -183,8 +171,4 @@ _pfParticleNetHto4bMassRegressionOutputs = ['pfParticleNetHto4bMassRegressionH0J
                                             for flav_name in pfParticleNetHto4bMassRegressionA4JetTags.flav_names]
 
 _pfParticleNetJetTagsAll = _pfParticleNetJetTagsProbs + _pfParticleNetJetTagsMetaDiscrs + \
-                           _pfMassDecorrelatedParticleNetJetTagsProbs + _pfMassDecorrelatedParticleNetJetTagsMetaDiscrs + \
-                           _pfMassDecorrelatedParticleNetHto4bJetTagsProbs
-
-_pfParticleNetMassRegressionAll = _pfParticleNetMassRegressionOutputs + \
-                                  _pfParticleNetHto4bMassRegressionOutputs
+    _pfMassDecorrelatedParticleNetJetTagsProbs + _pfMassDecorrelatedParticleNetJetTagsMetaDiscrs
