@@ -55,17 +55,24 @@ pfParticleNetMassRegressionJetTags = boostedJetONNXJetTagsProducer.clone(
     flav_names = ["mass"],
 )
 
-pfParticleNetHto4bMassRegressionH0JetTags = boostedJetONNXJetTagsProducer.clone(
+pfParticleNetHto4bMassRegressionH00JetTags = boostedJetONNXJetTagsProducer.clone(
     src = 'pfParticleNetTagInfos',
     preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/preprocess_wide_H_calc_mass_regr_loss3_Si_2023_08_31_v12_orig.json',
     model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/wide_H_calc_mass_regr_loss3_Si_2023_08_31_v12_orig.onnx',
+    flav_names = ["outputH00"],
+)
+
+pfParticleNetHto4bMassRegressionH0JetTags = boostedJetONNXJetTagsProducer.clone(
+    src = 'pfParticleNetTagInfos',
+    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/preprocess_wide_H_calc_mass_regr_loss3_Si_2023_08_31_v12.json',
+    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/wide_H_calc_mass_regr_loss3_Si_2023_08_31_v12.onnx',
     flav_names = ["outputH0"],
 )
 
 pfParticleNetHto4bMassRegressionH1JetTags = boostedJetONNXJetTagsProducer.clone(
     src = 'pfParticleNetTagInfos',
-    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/preprocess_wide_H_calc_mass_regr_loss3_Si_2023_08_31_v12.json',
-    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/wide_H_calc_mass_regr_loss3_Si_2023_08_31_v12.onnx',
+    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/preprocess_wide_H_calc_mass_regr_loss3_Si_AWB_2023_09_14_v12.json',
+    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionH/V01/wide_H_calc_mass_regr_loss3_Si_AWB_2023_09_14_v12.onnx',
     flav_names = ["outputH1"],
 )
 
@@ -90,10 +97,17 @@ pfParticleNetHto4bMassRegressionH4JetTags = boostedJetONNXJetTagsProducer.clone(
     flav_names = ["outputH4"],
 )
 
-pfParticleNetHto4bMassRegressionA1JetTags = boostedJetONNXJetTagsProducer.clone(
+pfParticleNetHto4bMassRegressionA0JetTags = boostedJetONNXJetTagsProducer.clone(
     src = 'pfParticleNetTagInfos',
     preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionA/V01/preprocess_MA-regr_mass_mode3_mH-125_E40_AWB_2023_08_31_v12.json',
     model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionA/V01/MA-regr_mass_mode3_mH-125_E40_AWB_2023_08_31_v12.onnx',
+    flav_names = ["outputA0"],
+)
+
+pfParticleNetHto4bMassRegressionA1JetTags = boostedJetONNXJetTagsProducer.clone(
+    src = 'pfParticleNetTagInfos',
+    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionA/V01/preprocess_MA-regr_mass_mode3_mH-125_E40_AWB_2023_09_28_v12.json',
+    model_path = 'RecoBTag/Combined/data/ParticleNetAK8/Hto4bMassRegressionA/V01/MA-regr_mass_mode3_mH-125_E40_AWB_2023_09_28_v12.onnx',
     flav_names = ["outputA1"],
 )
 
@@ -151,7 +165,9 @@ _pfMassDecorrelatedParticleNetHto4bJetTagsProbs = ['pfMassDecorrelatedParticleNe
 _pfParticleNetMassRegressionOutputs = ['pfParticleNetMassRegressionJetTags:' + flav_name
                                        for flav_name in pfParticleNetMassRegressionJetTags.flav_names]
 
-_pfParticleNetHto4bMassRegressionOutputs = ['pfParticleNetHto4bMassRegressionH0JetTags:' + flav_name
+_pfParticleNetHto4bMassRegressionOutputs = ['pfParticleNetHto4bMassRegressionH00JetTags:' + flav_name
+                                            for flav_name in pfParticleNetHto4bMassRegressionH00JetTags.flav_names] + \
+                                           ['pfParticleNetHto4bMassRegressionH0JetTags:' + flav_name
                                             for flav_name in pfParticleNetHto4bMassRegressionH0JetTags.flav_names] + \
                                            ['pfParticleNetHto4bMassRegressionH1JetTags:' + flav_name
                                             for flav_name in pfParticleNetHto4bMassRegressionH1JetTags.flav_names] + \
@@ -161,6 +177,8 @@ _pfParticleNetHto4bMassRegressionOutputs = ['pfParticleNetHto4bMassRegressionH0J
                                             for flav_name in pfParticleNetHto4bMassRegressionH3JetTags.flav_names] + \
                                            ['pfParticleNetHto4bMassRegressionH4JetTags:' + flav_name
                                             for flav_name in pfParticleNetHto4bMassRegressionH4JetTags.flav_names] + \
+                                           ['pfParticleNetHto4bMassRegressionA0JetTags:' + flav_name
+                                            for flav_name in pfParticleNetHto4bMassRegressionA0JetTags.flav_names] + \
                                            ['pfParticleNetHto4bMassRegressionA1JetTags:' + flav_name
                                             for flav_name in pfParticleNetHto4bMassRegressionA1JetTags.flav_names] + \
                                            ['pfParticleNetHto4bMassRegressionA2JetTags:' + flav_name
