@@ -29,6 +29,16 @@ nanoMetadata = cms.EDProducer("UniqueStringProducer",
     )
 )
 
+selectedFatJets = cms.EDFilter("PatJetSelector",
+    src = cms.InputTag('slimmedJetsAK8'),
+    cut = cms.string("pt >= 170")
+)
+
+fatJetCountFilter = cms.EDFilter("PatJetCountFilter",
+    src = cms.InputTag('selectedFatJets'),
+    minNumber = cms.uint32(1)
+)
+
 linkedObjects = cms.EDProducer("PATObjectCrossLinker",
    jets=cms.InputTag("finalJets"),
    muons=cms.InputTag("finalMuons"),
@@ -108,7 +118,7 @@ l1bits=cms.EDProducer("L1TriggerResultsConverter", src=cms.InputTag("gtStage2Dig
 (run2_miniAOD_80XLegacy | run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1).toModify(l1bits, storeUnprefireableBit=False)
 
 nanoSequenceCommon = cms.Sequence(
-        nanoMetadata + jetSequence + muonSequence + tauSequence + boostedTauSequence + electronSequence + lowPtElectronSequence + photonSequence+vertexSequence+
+        nanoMetadata + selectedFatJets + fatJetCountFilter + jetSequence + muonSequence + tauSequence + boostedTauSequence + electronSequence + lowPtElectronSequence + photonSequence+vertexSequence+
         isoTrackSequence + jetLepSequence + # must be after all the leptons
         linkedObjects  +
         jetTables + muonTables + tauTables + boostedTauTables + electronTables + lowPtElectronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + isoTrackTables
@@ -330,9 +340,10 @@ def nanoAOD_addDeepInfoAK8(process, addDeepBTag, addDeepBoostedJet, addDeepDoubl
         _btagDiscriminators += ( Hto4bTags )
         from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetHto4bMassRegressionOutputs as Hto4bMass
         _btagDiscriminators += ( Hto4bMass )
+        _btagDiscriminatorsToRun = _pfParticleNetMassRegressionOutputs + Hto4bTags + Hto4bMass
 
     if len(_btagDiscriminators)==0: return process
-    print("Will recalculate the following discriminators on AK8 jets: "+", ".join(_btagDiscriminators))
+    print("Will recalculate the following discriminators on AK8 jets: "+", ".join(_btagDiscriminatorsToRun))
     updateJetCollection(
        process,
        jetSource = cms.InputTag('slimmedJetsAK8'),
@@ -340,7 +351,7 @@ def nanoAOD_addDeepInfoAK8(process, addDeepBTag, addDeepBoostedJet, addDeepDoubl
        svSource = cms.InputTag('slimmedSecondaryVertices'),
        rParam = 0.8,
        jetCorrections = (jecPayload.value(), cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
-       btagDiscriminators = _btagDiscriminators,
+       btagDiscriminators = _btagDiscriminatorsToRun,
        postfix='AK8WithDeepInfo',
        printWarning = False
        )
@@ -356,7 +367,8 @@ def nanoAOD_runMETfixEE2017(process,isData):
                                postfix = "FixEE2017")
     process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(jetSequence),process.fullPatMetSequenceFixEE2017)
 
-def nanoAOD_customizeCommon(process):
+def nanoAOD_customizeCommon(process,skimFat=False):
+    process.fatJetCountFilter.minNumber = cms.uint32(1 if skimFat else 0)
     makePuppiesFromMiniAOD(process,True)
     process.puppiNoLep.useExistingWeights = True
     process.puppi.useExistingWeights = True
@@ -435,15 +447,15 @@ def nanoAOD_customizeCommon(process):
         process = nanoAOD_addBoostedTauIds(process)
     return process
 
-def nanoAOD_customizeData(process):
-    process = nanoAOD_customizeCommon(process)
+def nanoAOD_customizeData(process,skimFat=False):
+    process = nanoAOD_customizeCommon(process,skimFat)
     process = nanoAOD_recalibrateMETs(process,isData=True)
     for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
         modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=True))
     return process
 
-def nanoAOD_customizeMC(process):
-    process = nanoAOD_customizeCommon(process)
+def nanoAOD_customizeMC(process,skimFat=False):
+    process = nanoAOD_customizeCommon(process,skimFat)
     process = nanoAOD_recalibrateMETs(process,isData=False)
     for modifier in run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
         modifier.toModify(process, lambda p: nanoAOD_runMETfixEE2017(p,isData=False))
