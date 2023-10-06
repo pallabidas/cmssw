@@ -17,7 +17,7 @@ config.General.transferLogs = False
 
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'test/HIG-RunIISummer20UL18NanoAODv9-02146_addHto4bPlus_cfg.py'
-config.JobType.inputFiles = '../../RecoBTag/Combined/data/ParticleNetAK8/'
+#config.JobType.inputFiles = '/afs/cern.ch/work/a/abrinke1/public/HiggsToAA/NanoAOD/crab/2018/CMSSW_10_6_26/src/RecoBTag/Combined/data/ParticleNetAK8/'
 #config.JobType.pyCfgParams = ['maxEvt=-1', 'prtEvt=10000', 'nVtxMin=50', 'HCALPFA=%s' % (scheme)] 
 #config.JobType.outputFiles = ['L1Ntuple_HCAL.root']
 
