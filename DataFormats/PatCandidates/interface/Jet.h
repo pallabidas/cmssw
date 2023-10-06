@@ -543,6 +543,17 @@ namespace pat {
 			   [] (reco::Candidate::LorentzVector const & a, reco::CandidatePtr const & b){return a + b->p4();}).mass() :
 	  -1.0;
       }
+      double groomedMassUncorr(std::string const & label) const{
+	if (subjets(label).size() == 0) {
+	  return -1.0;
+	} else {
+	  reco::Candidate::LorentzVector vec_sum;
+	  for (uint i=0; i<subjets(label).size(); i++) {
+	    vec_sum = vec_sum + (subjets(label).at(i)->p4() * subjets(label).at(i)->jecFactor(0));
+	  }
+	  return vec_sum.mass();
+	}
+      }
 
     protected:
 
