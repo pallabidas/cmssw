@@ -1,4 +1,4 @@
-# cmsDriver.py --python_filename HIG-RunIISummer20UL18NanoAODv9-02146_1_cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:HIG-RunIISummer20UL18NanoAODv9-02146.root --conditions 106X_upgrade2018_realistic_v16_L1v1 --step NANO --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --mc -n 100
+# cmsDriver.py --python_filename HIG-RunIISummer20UL18NanoAODv9-02146_1_cfg.py --eventcontent NANOAODSIM --datatier NANOAODSIM --fileout file:HIG-RunIISummer20UL18NanoAODv9-02146.root --conditions 106X_upgrade2018_realistic_v16_L1v1 --step NANO --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --mc -n 100
 
 MAX_EVT  = 100   ## Maximum number of events to process
 PRT_EVT  = 10    ## Print every Nth event
@@ -127,12 +127,6 @@ from PhysicsTools.NanoAOD.nano_addHto4b_cff import nanoAOD_customizeMC
 
 #call to customisation function nanoAOD_customizeMC imported from PhysicsTools.NanoAOD.nano_addHto4b_cff
 process = nanoAOD_customizeMC(process, SKIM_FAT)
-
-# # Automatic addition of the customisation function from Configuration.DataProcessing.Utils
-# from Configuration.DataProcessing.Utils import addMonitoring 
-
-# #call to customisation function addMonitoring imported from Configuration.DataProcessing.Utils
-# process = addMonitoring(process)
 
 # End of customisation functions
 
