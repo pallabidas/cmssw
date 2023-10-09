@@ -37,6 +37,7 @@
 #include "DataFormats/Provenance/interface/ProcessHistoryRegistry.h"
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include "DataFormats/NanoAOD/interface/UniqueString.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "PhysicsTools/NanoAOD/plugins/TableOutputBranches.h"
 #include "PhysicsTools/NanoAOD/plugins/TriggerOutputBranches.h"
 #include "PhysicsTools/NanoAOD/plugins/EventStringOutputBranches.h"
@@ -67,6 +68,9 @@ private:
   bool m_writeProvenance;
   bool m_fakeName; //crab workaround, remove after crab is fixed
   int m_autoFlush;
+  bool m_writeTriggerBranches;
+  bool m_skimFatJet;
+  edm::EDGetTokenT<std::vector<pat::Jet>> m_fatJetToken;
   edm::ProcessHistoryRegistry m_processHistoryRegistry;
   edm::JobReport::Token m_jrToken;
   std::unique_ptr<TFile> m_file;
@@ -149,6 +153,9 @@ NanoAODOutputModule::NanoAODOutputModule(edm::ParameterSet const& pset):
   m_writeProvenance(pset.getUntrackedParameter<bool>("saveProvenance", true)),
   m_fakeName(pset.getUntrackedParameter<bool>("fakeNameForCrab", false)),
   m_autoFlush(pset.getUntrackedParameter<int>("autoFlush", -10000000)),
+  m_writeTriggerBranches(pset.getUntrackedParameter<bool>("writeTriggerBranches", true)),
+  m_skimFatJet(pset.getUntrackedParameter<bool>("skimFatJet", false)),
+  m_fatJetToken(consumes<std::vector<pat::Jet>>(edm::InputTag("slimmedJetsAK8"))),
   m_processHistoryRegistry()
 {
 }
@@ -159,9 +166,24 @@ NanoAODOutputModule::~NanoAODOutputModule()
 
 void 
 NanoAODOutputModule::write(edm::EventForOutput const& iEvent) {
+
   //Get data from 'e' and write it to the file
   edm::Service<edm::JobReport> jr;
   jr->eventWrittenToFile(m_jrToken, iEvent.id().run(), iEvent.id().event());
+
+  if (m_skimFatJet) {
+    // Figure out if event contains a FatJet; if not, skip it
+    edm::Handle<std::vector<pat::Jet>> fatJets;
+    iEvent.getByToken(m_fatJetToken, fatJets);
+
+    uint nFatJets = 0;
+    for (const pat::Jet & fatJet : *fatJets) {
+      if (fatJet.p4().Pt() > 170) {
+	nFatJets += 1;
+      }
+    }
+    if (nFatJets == 0) return;
+  }
 
   if (m_autoFlush) {
     int64_t events = m_tree->GetEntriesFast();
@@ -212,7 +234,9 @@ NanoAODOutputModule::write(edm::EventForOutput const& iEvent) {
     m_triggers_areSorted = true;
   }
   // fill triggers
-  for (auto & t : m_triggers) t.fill(iEvent,*m_tree);
+  if (m_writeTriggerBranches) {
+    for (auto & t : m_triggers) t.fill(iEvent,*m_tree);
+  }
   // fill event branches
   for (auto & t : m_evstrings) t.fill(iEvent,*m_tree);
   m_tree->Fill();
@@ -388,6 +412,10 @@ NanoAODOutputModule::fillDescriptions(edm::ConfigurationDescriptions& descriptio
         ->setComment("Change the OutputModule name in the fwk job report to fake PoolOutputModule. This is needed to run on cran (and publish) till crab is fixed");
   desc.addUntracked<int>("autoFlush", -10000000)
         ->setComment("Autoflush parameter for ROOT file");
+  desc.addUntracked<bool>("writeTriggerBranches", true)
+        ->setComment("Writes L1 and HLT trigger path decisions to NanoAOD output tree");
+  desc.addUntracked<bool>("skimFatJet", false)
+        ->setComment("Processes only events with at least one AK8 FatJet");
 
   //replace with whatever you want to get from the EDM by default
   const std::vector<std::string> keep = {"drop *", "keep nanoaodFlatTable_*Table_*_*", "keep edmTriggerResults_*_*_*", "keep String_*_genModel_*", "keep nanoaodMergeableCounterTable_*Table_*_*", "keep nanoaodUniqueString_nanoMetadata_*_*"};

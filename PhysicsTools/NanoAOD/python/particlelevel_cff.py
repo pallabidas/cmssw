@@ -171,5 +171,7 @@ HTXSCategoryTable = cms.EDProducer("SimpleHTXSFlatTableProducer",
 )
 
 
-particleLevelSequence = cms.Sequence(mergedGenParticles + genParticles2HepMC + particleLevel + tautagger + genParticles2HepMCHiggsVtx + rivetProducerHTXS)
-particleLevelTables = cms.Sequence(rivetLeptonTable + rivetPhotonTable + rivetMetTable + HTXSCategoryTable)
+## Don't need HTXS for BSM Higgs decay search; save time by skipping - AWB 2023.10.06
+## Drop '+ rivetProducerHTXS' from end of sequence, ' + HTXSCategoryTable' from end of table
+particleLevelSequence = cms.Sequence(mergedGenParticles + genParticles2HepMC + particleLevel + tautagger + genParticles2HepMCHiggsVtx)
+particleLevelTables = cms.Sequence(rivetLeptonTable + rivetPhotonTable + rivetMetTable)

@@ -52,7 +52,7 @@ def applyDeepBtagging( process, postfix="" ) :
     from RecoBTag.ONNXRuntime.pfDeepBoostedJet_cff import _pfDeepBoostedJetTagsAll as pfDeepBoostedJetTagsAll
     from RecoBTag.ONNXRuntime.pfHiggsInteractionNet_cff import _pfHiggsInteractionNetTagsProbs as pfHiggsInteractionNetTagsProbs
     from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
-    from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetMassRegressionOutputs
+    from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetMassRegressionAll as pfParticleNetMassRegressionAll
     from RecoBTag.ONNXRuntime.pfMassIndependentDeepDoubleXV2JetTags_cff import _pfMassIndependentDeepDoubleXV2JetTagsAll as pfMassIndependentDeepDoubleXV2JetTagsAll
 
     # update slimmed jets to include particle-based deep taggers (keep same name)
@@ -74,10 +74,11 @@ def applyDeepBtagging( process, postfix="" ) :
         ) + pfDeepBoostedJetTagsAll
     )
     run2_miniAOD_UL.toModify(_btagDiscriminators,
-                             names = _btagDiscriminators.names + pfParticleNetJetTagsAll + pfHiggsInteractionNetTagsProbs + pfMassIndependentDeepDoubleXV2JetTagsAll)
+                             names = _btagDiscriminators.names + pfParticleNetJetTagsAll + pfHiggsInteractionNetTagsProbs + \
+                             pfMassIndependentDeepDoubleXV2JetTagsAll + pfParticleNetMassRegressionAll)
     run2_miniAOD_devel.toModify(
         _btagDiscriminators, names=_btagDiscriminators.names + pfParticleNetJetTagsAll + pfHiggsInteractionNetTagsProbs +
-        pfMassIndependentDeepDoubleXV2JetTagsAll + _pfParticleNetMassRegressionOutputs)
+        pfMassIndependentDeepDoubleXV2JetTagsAll + pfParticleNetMassRegressionAll)
     updateJetCollection(
        process,
        jetSource = cms.InputTag('slimmedJetsAK8NoDeepTags'),
