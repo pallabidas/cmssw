@@ -15,7 +15,7 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'test/HIG-RunIISummer20UL18NanoAODv9-02146_addHto4bPlus_crab_cfg.py'
+config.JobType.psetName = 'test/Nano_MC_addHto4bPlus_crab_cfg.py'
 config.JobType.maxMemoryMB = 4000
 config.JobType.maxJobRuntimeMin = 3000
 

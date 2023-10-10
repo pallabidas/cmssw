@@ -15,7 +15,7 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'test/HIG-RunIISummer20UL18NanoAODv9-02146_addHto4bPlus_crab_cfg.py'
+config.JobType.psetName = 'test/Nano_MC_addHto4bPlus_crab_cfg.py'
 config.JobType.maxMemoryMB = 4000
 
 # config.Data.inputDataset = '/SUSY_GluGluH_01J_HToAATo4B_Pt150_M-12_TuneCP5_13TeV_madgraph_pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v1/MINIAODSIM'
