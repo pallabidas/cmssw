@@ -4,6 +4,13 @@
 voms-proxy-init --voms cms --valid 168:00
 ```
 
+### Scripts for job submission, status, resubmit, and getlog
+#### Copy and modify crab_ZJets.sh for MC, crab_JetHT.sh for data
+```
+scripts/crab_ZJets.sh
+scripts/crab_JetHT.sh
+```
+
 ### Check jobs status
 ```
 crab status -d crab/r1/[dir_name] --verboseErrors
