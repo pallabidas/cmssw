@@ -31,5 +31,6 @@ config.Data.ignoreLocality = False
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased' # 'Automatic' #'LumiBased' 'FileBased'
 config.Data.unitsPerJob = 10
+# config.Data.totalUnits = 100  ## Perform a small test
 config.Site.storageSite = 'T2_CH_CERN' # Choose your site
 config.Data.outLFNDirBase = '/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/'

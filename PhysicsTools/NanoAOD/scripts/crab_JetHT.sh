@@ -59,10 +59,17 @@ do
 		mkdir /eos/cms${OUTD}${ERA}
 	    fi
 	fi
+	## Adjust # of LS depending on era (specific to JetHT)
+	LS="5"
+	if [ "${IDX}" = "A" ]; then
+	    LS="6"
+	else if [ "${IDX}" = "D" ]; then
+	    LS="13"
+	fi
 	## Submit crab jobs
-	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/"
+	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
 	if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
-	    crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/"
+	    crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
 	fi
     fi
 
