@@ -1,6 +1,6 @@
 
 '''
-crab submit -c crab/crabConfig.py
+crab submit -c crab/crabConfigMC.py
 
 crab status -d <dir name>
 '''
