@@ -47,6 +47,16 @@ OUTD="/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/MC/PNet_v1_2023_10_06/"
 for HT in "800toInf" "600to800" "400to600" "200to400"
 do
 
+    ## <<< *********************************** >>>
+    ## <<< ** crab status, resubmit, getlog ** >>>
+    ## <<< *********************************** >>>
+    if [ "$CMD" = "status" ] || [ "$CMD" = "resubmit" ] || [ "$CMD" = "getlog" ]; then
+	echo crab ${CMD} -d crab/r1/crab_${PREF}${HT}${SUFF} $OPTS
+	if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
+	    crab ${CMD} -d crab/r1/crab_${PREF}${HT}${SUFF} $OPTS
+	fi
+    fi
+
     ## <<< ***************** >>>
     ## <<< ** crab submit ** >>>
     ## <<< ***************** >>>
@@ -65,13 +75,4 @@ do
 	fi
     fi
 
-    ## <<< *********************************** >>>
-    ## <<< ** crab status, resubmit, getlog ** >>>
-    ## <<< *********************************** >>>
-    if [ "$CMD" = "status" ] || [ "$CMD" = "resubmit" ] || [ "$CMD" = "getlog" ]; then
-	echo crab ${CMD} -d crab/r1/crab_${PREF}${HT}${SUFF} $OPTS
-	if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
-	    crab ${CMD} -d crab/r1/crab_${PREF}${HT}${SUFF} $OPTS
-	fi
-    fi
 done

@@ -44,34 +44,9 @@ SUFF="-UL2018_MiniAODv2_GT36-v1"
 OUTD="/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/"
 
 ## Loop over data-taking eras
-for IDX in "A" "B" "C" "D" "E"
+for IDX in "A" "B" "C" "D"
 do
     ERA="${PREF}${IDX}${SUFF}"
-
-    ## <<< ***************** >>>
-    ## <<< ** crab submit ** >>>
-    ## <<< ***************** >>>
-    if [ "$CMD" = "submit" ]; then
-	## Create output directory if it doesn't exist
-	if [ ! -d "/eos/cms${OUTD}${ERA}" ]; then
-	    echo mkdir /eos/cms${OUTD}${ERA}
-	    if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
-		mkdir /eos/cms${OUTD}${ERA}
-	    fi
-	fi
-	## Adjust # of LS depending on era (specific to JetHT)
-	LS="5"
-	if [ "${IDX}" = "A" ]; then
-	    LS="6"
-	else if [ "${IDX}" = "D" ]; then
-	    LS="13"
-	fi
-	## Submit crab jobs
-	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
-	if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
-	    crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
-	fi
-    fi
 
     ## <<< *********************************** >>>
     ## <<< ** crab status, resubmit, getlog ** >>>
@@ -82,4 +57,30 @@ do
 	    crab ${CMD} -d crab/r1/crab_${PD}_${ERA} $OPTS
 	fi
     fi
+
+    ## <<< ***************** >>>
+    ## <<< ** crab submit ** >>>
+    ## <<< ***************** >>>
+    if [ "$CMD" = "submit" ]; then
+    	## Create output directory if it doesn't exist
+    	if [ ! -d "/eos/cms${OUTD}${ERA}" ]; then
+    	    echo mkdir /eos/cms${OUTD}${ERA}
+    	    if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
+    		mkdir /eos/cms${OUTD}${ERA}
+    	    fi
+    	fi
+    	## Adjust # of LS depending on era (specific to JetHT)
+    	LS="5"
+    	if [ "${IDX}" = "A" ]; then
+    	    LS="6"
+    	elif [ "${IDX}" = "D" ]; then
+    	    LS="13"
+    	fi
+    	## Submit crab jobs
+    	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
+    	if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
+    	    crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
+    	fi
+    fi
+
 done
