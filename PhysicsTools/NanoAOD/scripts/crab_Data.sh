@@ -1,6 +1,15 @@
 #!/bin/bash
 
-## Run ./scripts/crab_JetHT.sh CMD [TST] [OPT1] ... [OPT7]
+## Construct the string for samples in DAS (https://cmsweb.cern.ch/das/)
+## dataset dataset=/JetHT/Run2018*-UL2018_MiniAODv2_GT36-v1/MINIAOD
+## dataset dataset=/SingleMuon/Run2018*-UL2018_MiniAODv2_GT36-v1/MINIAOD
+PD="JetHT"
+# PD="SingleMuon"
+PREF="Run2018"
+SUFF="-UL2018_MiniAODv2_GT36-"
+OUTD="/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/"
+
+## Run ./scripts/crab_Data.sh CMD [TST] [OPT1] ... [OPT7]
 ## Where CMD = 'submit' or 'status',
 ##   and TST = 'test' for test mode
 ## See crab/README.md for some typical options, or run
@@ -36,17 +45,27 @@ if [ "$CMD" != "submit" ] && [ "$CMD" != "status" ] && [ "$CMD" != "resubmit" ] 
     exit
 fi
 
-## Construct the string for JetHT samples in DAS (https://cmsweb.cern.ch/das/)
-## dataset dataset=/JetHT/Run2018*-UL2018_MiniAODv2_GT36-v1/MINIAOD
-PD="JetHT"
-PREF="Run2018"
-SUFF="-UL2018_MiniAODv2_GT36-v1"
-OUTD="/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/PNet_v1_2023_10_06/"
-
 ## Loop over data-taking eras
 for IDX in "A" "B" "C" "D"
 do
     ERA="${PREF}${IDX}${SUFF}"
+
+    ## Adjust ERA and # of LS depending on dataset and era
+    if [ "$PD" = "JetHT" ]; then
+	ERA="${ERA}v1"
+    	LS="6"
+    	if [ "${IDX}" = "D" ]; then
+    	    LS="13"
+    	fi
+    elif  [ "$PD" = "SingleMuon" ]; then
+	ERA="${ERA}v2"
+    	LS="12"
+    	if [ "${IDX}" = "C" ]; then
+	    ERA="${ERA}v3"
+    	elif [ "${IDX}" = "D" ]; then
+    	    LS="52"
+    	fi
+    fi
 
     ## <<< *********************************** >>>
     ## <<< ** crab status, resubmit, getlog ** >>>
@@ -68,13 +87,6 @@ do
     	    if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
     		mkdir /eos/cms${OUTD}${ERA}
     	    fi
-    	fi
-    	## Adjust # of LS depending on era (specific to JetHT)
-    	LS="5"
-    	if [ "${IDX}" = "A" ]; then
-    	    LS="6"
-    	elif [ "${IDX}" = "D" ]; then
-    	    LS="13"
     	fi
     	## Submit crab jobs
     	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
