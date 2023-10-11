@@ -12,9 +12,9 @@ do
 	if [ $n -eq 2 ]; then  ## Sample name is 2nd sub-string
 	    IFS=' '  ## Set IFS back to default space
 	    echo ""
-	    echo crab submit -c crab/crabConfigLongMC.py Data.inputDataset=$SAMP General.requestName=$SUB
+	    echo crab submit -c crab/crabConfigMC.py Data.inputDataset=$SAMP General.requestName=$SUB JobType.maxJobRuntimeMin=3000 Data.splitting="FileBased" Data.unitsPerJob=1
 	    echo ""
-	    crab submit -c crab/crabConfigLongMC.py Data.inputDataset=$SAMP General.requestName=$SUB
+	    crab submit -c crab/crabConfigMC.py Data.inputDataset=$SAMP General.requestName=$SUB JobType.maxJobRuntimeMin=3000 Data.splitting="FileBased" Data.unitsPerJob=1
 	    echo ""
 	    break  ## We're all done now! On to the next sample
 	fi
