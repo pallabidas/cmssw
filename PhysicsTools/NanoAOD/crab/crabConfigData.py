@@ -12,7 +12,7 @@ config = config()
 
 config.General.workArea = 'crab/r1'
 config.General.transferOutputs = True
-config.General.transferLogs = True
+config.General.transferLogs = False
 
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'test/Nano_Data_addHto4bPlus_crab_cfg.py'
