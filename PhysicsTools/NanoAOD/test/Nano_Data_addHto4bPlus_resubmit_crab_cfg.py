@@ -1,8 +1,15 @@
 # cmsDriver.py --python_filename test/JetHT_cfg.py --eventcontent NANOAOD --datatier NANOAOD --fileout file:JetHT.root --conditions 106X_dataRun2_v36 --step NANO --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --data -n 100
 
-JOBID  = ''
-INFILE = 'file:/eos/cms/store/group/phys_susy/HToaaTo4b/MiniAOD/2018/MC/QCD_HT700to1000_BGenFilter_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18/04193046-685A-9541-881A-AF38A95F79BA.root'
-OUTDIR = ''
+TOPDIR = '/eos/cms/store/group/phys_susy/HToaaTo4b/NanoAOD/2018/data/'
+
+JOBID   = '2535'
+INFILES = ['file:/eos/cms/store/group/phys_susy/HToaaTo4b/MiniAOD/2018/data/JetHT/Run2018A-UL2018_MiniAODv2_GT36-v1/8CA8B24E-9764-3745-9086-C4826E038B13.root',
+           'file:/eos/cms/store/group/phys_susy/HToaaTo4b/MiniAOD/2018/data/JetHT/Run2018A-UL2018_MiniAODv2_GT36-v1/1A05DD2B-73B0-BD4D-82C7-8028CC42F805.root']
+LUMIS   = ["316187:57-316187:57", "316187:22-316187:22", "316187:16-316187:16", "316187:19-316187:19", "316187:52-316187:52", "316187:47-316187:47"]
+OUTFILE = TOPDIR+'PNet_v1_2023_10_06/Run2018A-UL2018_MiniAODv2_GT36-v1/JetHT/r1/231009_211628/0002/PNet_v1_'+JOBID
+
+
+## ----------------------------------------------------------------------------- ##
 
 import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
@@ -24,11 +31,12 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(INFILE),
+    fileNames = cms.untracked.vstring(FILE for FILE in INFILES),
+    lumisToProcess = cms.untracked.VLuminosityBlockRange(LUMI for LUMI in LUMIS),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -51,7 +59,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAOD'),
         filterName = cms.untracked.string('')
     ),
-    fileName = cms.untracked.string(OUTDIR+'PNet_v1_'+JOBID+'.root'),
+    fileName = cms.untracked.string(OUTFILE+'.root'),
     outputCommands = process.NANOAODEventContent.outputCommands
 )
 
