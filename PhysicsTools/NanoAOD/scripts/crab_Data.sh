@@ -2,7 +2,7 @@
 
 ## Construct the string for samples in DAS (https://cmsweb.cern.ch/das/)
 ## dataset dataset=/JetHT/Run2018*-UL2018_MiniAODv2_GT36-v1/MINIAOD
-## dataset dataset=/SingleMuon/Run2018*-UL2018_MiniAODv2_GT36-v1/MINIAOD
+## dataset dataset=/SingleMuon/Run2018*-UL2018_MiniAODv2_GT36-v*/MINIAOD
 PD="JetHT"
 # PD="SingleMuon"
 PREF="Run2018"
@@ -61,7 +61,7 @@ do
 	ERA="${ERA}v2"
     	LS="12"
     	if [ "${IDX}" = "C" ]; then
-	    ERA="${ERA}v3"
+	    ERA="${PREF}${IDX}${SUFF}v3"
     	elif [ "${IDX}" = "D" ]; then
     	    LS="52"
     	fi
@@ -89,9 +89,9 @@ do
     	    fi
     	fi
     	## Submit crab jobs
-    	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
+	echo crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" Data.unitsPerJob="${LS}"
     	if [ "$TST" != "test" ] && [ "$TST" != "Test" ] && [ "$TST" != "TEST" ]; then
-    	    crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" config.Data.unitsPerJob="${LS}"
+	    crab submit -c crab/crabConfigData.py $OPTS Data.inputDataset="/${PD}/${ERA}/MINIAOD" General.requestName="${PD}_${ERA}" Data.outLFNDirBase="${OUTD}${ERA}/" Data.unitsPerJob="${LS}"
     	fi
     fi
 
