@@ -28,11 +28,15 @@ git cms-addpkg CommonTools/RecoAlgos
 
 git clone git@github.com:cms-data/RecoBTag-Combined.git RecoBTag/Combined/data
 
+## Use one of the following 'git remote add' commands:
+git remote add abrinke1 https://gitlab.cern.ch/abrinke1/cmssw.git
 git remote add abrinke1 ssh://git@gitlab.cern.ch:7999/abrinke1/cmssw.git
 git checkout -b HtoAA_PNet_Prod_v1_2023_10_06
 git pull abrinke1 HtoAA_PNet_Prod_v1_2023_10_06
 
 cd RecoBtag/Combined/data/
+## Use one of the following 'git remote add' commands:
+git remote add abrinke1 https://github.com/abrinke1/RecoBTag-Combined.git
 git remote add abrinke1 git@github.com:abrinke1/RecoBTag-Combined.git
 git checkout -b HtoAA_PNet_Prod_v1_2023_10_06_slim
 git pull abrinke1 HtoAA_PNet_Prod_v1_2023_10_06_slim
