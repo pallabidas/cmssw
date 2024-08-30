@@ -26,6 +26,13 @@ pfMassDecorrelatedParticleNetJetTags = boostedJetONNXJetTagsProducer.clone(
                   "probQCDb", "probQCDc", "probQCDothers"],
 )
 
+#pfMassDecorrelatedParticleNetAtobbMJetTags = boostedJetONNXJetTagsProducer.clone(
+#    src = 'pfParticleNetTagInfos',
+#    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK4/Atobb/preprocess.json',
+#    model_path = 'RecoBTag/Combined/data/ParticleNetAK4/Atobb/model.onnx',
+#    flav_names = ["probAtobb", "probBkg"],
+#)
+
 pfMassDecorrelatedParticleNetHto4bMJetTags = boostedJetONNXJetTagsProducer.clone(
     src = 'pfParticleNetTagInfos',
     preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK8/MD-Hto4b/V01/preprocess_multiclass_wH-70_E30_AWB_2023_08_31_v12.json',
@@ -154,6 +161,9 @@ _pfMassDecorrelatedParticleNetJetTagsProbs = ['pfMassDecorrelatedParticleNetJetT
 # mass-decorrelated: meta-taggers
 _pfMassDecorrelatedParticleNetJetTagsMetaDiscrs = ['pfMassDecorrelatedParticleNetDiscriminatorsJetTags:' + disc.name.value()
                                    for disc in pfMassDecorrelatedParticleNetDiscriminatorsJetTags.discriminators]
+## mass-decorrelated: A->bb tagger
+#_pfMassDecorrelatedParticleNetAtobbJetTagsProbs = ['pfMassDecorrelatedParticleNetAtobbMJetTags:' + flav_name
+#                                                   for flav_name in pfMassDecorrelatedParticleNetAtobbMJetTags.flav_names]
 # mass-decorrelated: H->aa->4b tagger
 _pfMassDecorrelatedParticleNetHto4bJetTagsProbs = ['pfMassDecorrelatedParticleNetHto4bMJetTags:' + flav_name
                                                    for flav_name in pfMassDecorrelatedParticleNetHto4bMJetTags.flav_names] + \

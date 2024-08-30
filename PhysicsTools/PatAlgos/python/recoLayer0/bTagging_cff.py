@@ -270,9 +270,9 @@ for disc in _pfMassDecorrelatedParticleNetJetTagsMetaDiscrs:
 
 # -----------------------------------
 # setup ParticleNet AK4
-from RecoBTag.ONNXRuntime.pfParticleNetAK4_cff import _pfParticleNetAK4JetTagsProbs, _pfParticleNetAK4JetTagsMetaDiscrs
+from RecoBTag.ONNXRuntime.pfParticleNetAK4_cff import _pfParticleNetAK4JetTagsProbs, _pfParticleNetAK4JetTagsMetaDiscrs, _pfMassDecorrelatedParticleNetAtobbJetTagsProbs
 # update supportedBtagDiscr
-for disc in _pfParticleNetAK4JetTagsProbs + _pfParticleNetAK4JetTagsMetaDiscrs:
+for disc in _pfParticleNetAK4JetTagsProbs + _pfParticleNetAK4JetTagsMetaDiscrs + _pfMassDecorrelatedParticleNetAtobbJetTagsProbs:
     supportedBtagDiscr[disc] = [["pfParticleNetAK4TagInfos"]]
 # update supportedMetaDiscr
 for disc in _pfParticleNetAK4JetTagsMetaDiscrs:

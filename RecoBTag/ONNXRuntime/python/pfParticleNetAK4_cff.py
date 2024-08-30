@@ -18,22 +18,35 @@ pfParticleNetAK4JetTags = boostedJetONNXJetTagsProducer.clone(
     flav_names = ["probb",  "probbb",  "probc",   "probcc",  "probuds", "probg", "probundef", "probpu"],
 )
 
+pfMassDecorrelatedParticleNetAtobbMJetTags = boostedJetONNXJetTagsProducer.clone(
+    src = 'pfParticleNetAK4TagInfos',
+    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK4/CHS/V00/preprocess.json',
+    model_path = 'RecoBTag/Combined/data/ParticleNetAK4/CHS/V00/particle-net.onnx',
+    flav_names = ["probb",  "probbb",  "probc",   "probcc",  "probuds", "probg", "probundef", "probpu"],
+#    preprocess_json = 'RecoBTag/Combined/data/ParticleNetAK4/Atobb/preprocess.json',
+#    model_path = 'RecoBTag/Combined/data/ParticleNetAK4/Atobb/model.onnx',
+#    flav_names = ["probAtobb", "probBkg"],
+)
+
 from CommonTools.PileupAlgos.Puppi_cff import puppi
 from PhysicsTools.PatAlgos.slimming.primaryVertexAssociation_cfi import primaryVertexAssociation
 
 # This task is not used, useful only if we run it from RECO jets (RECO/AOD)
 pfParticleNetAK4Task = cms.Task(puppi, primaryVertexAssociation, pfParticleNetAK4TagInfos,
-                                pfParticleNetAK4JetTags, pfParticleNetAK4DiscriminatorsJetTags)
+                                pfParticleNetAK4JetTags, pfMassDecorrelatedParticleNetAtobbMJetTags, pfParticleNetAK4DiscriminatorsJetTags)
 
 # declare all the discriminators
 # probs
 _pfParticleNetAK4JetTagsProbs = ['pfParticleNetAK4JetTags:' + flav_name
                                  for flav_name in pfParticleNetAK4JetTags.flav_names]
+# mass-decorrelated: A->bb tagger
+_pfMassDecorrelatedParticleNetAtobbJetTagsProbs = ['pfMassDecorrelatedParticleNetAtobbMJetTags:' + flav_name
+                                                   for flav_name in pfMassDecorrelatedParticleNetAtobbMJetTags.flav_names]
 # meta-taggers
 _pfParticleNetAK4JetTagsMetaDiscrs = ['pfParticleNetAK4DiscriminatorsJetTags:' + disc.name.value()
                                       for disc in pfParticleNetAK4DiscriminatorsJetTags.discriminators]
 
-_pfParticleNetAK4JetTagsAll = _pfParticleNetAK4JetTagsProbs + _pfParticleNetAK4JetTagsMetaDiscrs
+_pfParticleNetAK4JetTagsAll = _pfParticleNetAK4JetTagsProbs + _pfMassDecorrelatedParticleNetAtobbJetTagsProbs + _pfParticleNetAK4JetTagsMetaDiscrs
 
 
 # === Negative tags ===

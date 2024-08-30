@@ -19,9 +19,11 @@ process.load('PhysicsTools.NanoAOD.nano_addHto4bPlus_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('DUMMY'),
+    fileNames = cms.untracked.vstring('root://cms-xrd-global.cern.ch://store/mc/RunIISummer20UL18MiniAODv2/VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2/100000/2E4A001D-2B49-1747-B63F-4FF9718B53CC.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -44,7 +46,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAODSIM'),
         filterName = cms.untracked.string('')
     ),
-    fileName = cms.untracked.string('PNet_v1.root'),
+    fileName = cms.untracked.string('PNet_v3.root'),
     outputCommands = process.NANOAODSIMEventContent.outputCommands
 )
 

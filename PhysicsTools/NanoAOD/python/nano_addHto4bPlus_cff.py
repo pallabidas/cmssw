@@ -189,14 +189,20 @@ def nanoAOD_addDeepInfo(process,addDeepBTag,addDeepFlavour):
     if addDeepFlavour:
         print("Updating process to run DeepFlavour btag")
         _btagDiscriminators += ['pfDeepFlavourJetTags:probb','pfDeepFlavourJetTags:probbb','pfDeepFlavourJetTags:problepb','pfDeepFlavourJetTags:probc']
-    if len(_btagDiscriminators)==0: return process
-    print("Will recalculate the following discriminators: "+", ".join(_btagDiscriminators))
+    print("\n*** Updating process to re-run ParticleNet before it's included in MiniAOD ***\n")
+    from RecoBTag.ONNXRuntime.pfParticleNetAK4_cff import _pfMassDecorrelatedParticleNetAtobbJetTagsProbs as AtobbTags
+    _btagDiscriminatorsToRun = AtobbTags
+    if len(_btagDiscriminatorsToRun)==0: return process
+    print("Will recalculate the following discriminators: "+", ".join(_btagDiscriminatorsToRun))
     updateJetCollection(
                process,
                jetSource = cms.InputTag('slimmedJets'),
+               pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
+               svSource = cms.InputTag('slimmedSecondaryVertices'),
                jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
-               btagDiscriminators = _btagDiscriminators,
+               btagDiscriminators = _btagDiscriminatorsToRun,
                postfix = 'WithDeepInfo',
+               printWarning = False
            )
     process.load("Configuration.StandardSequences.MagneticField_cff")
     process.jetCorrFactorsNano.src="selectedUpdatedPatJetsWithDeepInfo"
@@ -377,14 +383,16 @@ def nanoAOD_customizeCommon(process,skimFat=False):
     process = nanoAOD_activateVID(process)
     nanoAOD_addDeepInfo_switch = cms.PSet(
         nanoAOD_addDeepBTag_switch = cms.untracked.bool(False),
-        nanoAOD_addDeepFlavourTag_switch = cms.untracked.bool(False),
+        nanoAOD_addDeepFlavourTag_switch = cms.untracked.bool(False)
         )
     run2_miniAOD_80XLegacy.toModify(nanoAOD_addDeepInfo_switch, nanoAOD_addDeepBTag_switch = cms.untracked.bool(True))
     for modifier in run2_miniAOD_80XLegacy, run2_nanoAOD_94X2016, run2_nanoAOD_94XMiniAODv1, run2_nanoAOD_94XMiniAODv2:
         modifier.toModify(nanoAOD_addDeepInfo_switch, nanoAOD_addDeepFlavourTag_switch =  cms.untracked.bool(True))
     process = nanoAOD_addDeepInfo(process,
-                                  addDeepBTag=nanoAOD_addDeepInfo_switch.nanoAOD_addDeepBTag_switch,
-                                  addDeepFlavour=nanoAOD_addDeepInfo_switch.nanoAOD_addDeepFlavourTag_switch)
+                                  addDeepBTag=False,
+                                  addDeepFlavour=False)
+#                                  addDeepBTag=nanoAOD_addDeepInfo_switch.nanoAOD_addDeepBTag_switch,
+#                                  addDeepFlavour=nanoAOD_addDeepInfo_switch.nanoAOD_addDeepFlavourTag_switch)
     nanoAOD_addDeepInfoAK8_switch = cms.PSet(
         nanoAOD_addDeepBTag_switch = cms.untracked.bool(False),
         nanoAOD_addDeepBoostedJet_switch = cms.untracked.bool(True),
