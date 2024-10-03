@@ -32,6 +32,8 @@
 
 // ECAL TPs
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
+#include "DataFormats/EcalDigi/interface/EcalEBPhase2TriggerPrimitiveDigi.h"
+#include "DataFormats/EcalDigi/interface/EBDataFrame_Ph2.h"
 
 // HCAL TPs
 #include "DataFormats/HcalDigi/interface/HcalTriggerPrimitiveDigi.h"
@@ -67,7 +69,7 @@ public:
 private:
   void produce(edm::Event&, const edm::EventSetup&) override;
 
-  edm::EDGetTokenT<EcalEBTrigPrimDigiCollection> ecalTPEBToken_;
+  edm::EDGetTokenT<EcalEBPhase2TrigPrimDigiCollection> ecalTPEBToken_;
   edm::EDGetTokenT<edm::SortedCollection<HcalTriggerPrimitiveDigi>> hcalTPToken_;
   edm::ESGetToken<CaloTPGTranscoder, CaloTPGRecord> decoderTag_;
 
@@ -85,7 +87,7 @@ private:
 // Phase2L1CaloEGammaEmulator initializer, destructor, and produce methods
 
 Phase2L1CaloEGammaEmulator::Phase2L1CaloEGammaEmulator(const edm::ParameterSet& iConfig)
-    : ecalTPEBToken_(consumes<EcalEBTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("ecalTPEB"))),
+    : ecalTPEBToken_(consumes<EcalEBPhase2TrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("ecalTPEB"))),
       hcalTPToken_(
           consumes<edm::SortedCollection<HcalTriggerPrimitiveDigi>>(iConfig.getParameter<edm::InputTag>("hcalTP"))),
       decoderTag_(esConsumes<CaloTPGTranscoder, CaloTPGRecord>(edm::ESInputTag("", ""))),
@@ -126,16 +128,28 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
   //***************************************************//
   // Get the ECAL hits
   //***************************************************//
-  edm::Handle<EcalEBTrigPrimDigiCollection> pcalohits;
+  edm::Handle<EcalEBPhase2TrigPrimDigiCollection> pcalohits;
   iEvent.getByToken(ecalTPEBToken_, pcalohits);
 
   std::vector<p2eg::SimpleCaloHit> ecalhits;
 
   for (const auto& hit : *pcalohits.product()) {
-    if (hit.encodedEt() > 0)  // hit.encodedEt() returns an int corresponding to 2x the crystal Et
+    EcalEBPhase2TriggerPrimitiveDigi d = hit;
+    //const EBDetId TPid = d.id();
+
+    //const float enConv = 1998.36/4095;
+    //float et = d[0].encodedEt()*enConv;
+    //if(et > 0) std::cout<<"encoded Et: "<<std::hex<<d[0].encodedEt()<<"\t"<<"et: "<<et<<std::endl;
+
+    float et = d[0].encodedEt() * 0.125;
+    //float eta = TPid.approxEta();
+    //float phi = (TPid.iphi()*(M_PI/180));
+    //std::cout<<et<<"\t"<<eta<<"\t"<<phi<<std::endl;
+    //if (hit.encodedEt() > 0)  // hit.encodedEt() returns an int corresponding to 2x the crystal Et
+    if (et > 0)
     {
       // Et is 10 bit, by keeping the ADC saturation Et at 120 GeV it means that you have to multiply by 0.125 (input LSB)
-      float et = hit.encodedEt() * 0.125;
+      //float et = hit.encodedEt() * 0.125;
       if (et < p2eg::cut_500_MeV) {
         continue;  // Reject hits with < 500 MeV ET
       }
@@ -148,8 +162,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
       ehit.setPosition(GlobalVector(cell->getPosition().x(), cell->getPosition().y(), cell->getPosition().z()));
       ehit.setEnergy(et);
       ehit.setEt_uint(
-          (ap_uint<10>)hit.encodedEt() >>
-          2);  // also save the uint Et, this is to convert between 0.125 (in MC production) and 0.5 (in firmware based code)
+          (ap_uint<10>)et>>21); //assuming LSB = 0.125
       ehit.setPt();
       ecalhits.push_back(ehit);
     }
@@ -643,7 +656,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
 void Phase2L1CaloEGammaEmulator::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // l1tPhase2L1CaloEGammaEmulator
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("ecalTPEB", edm::InputTag("simEcalEBTriggerPrimitiveDigis"));
+  desc.add<edm::InputTag>("ecalTPEB", edm::InputTag("simEcalEBTriggerPrimitivePhase2Digis"));
   desc.add<edm::InputTag>("hcalTP", edm::InputTag("simHcalTriggerPrimitiveDigis"));
   {
     edm::ParameterSetDescription psd0;
