@@ -134,22 +134,9 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
   std::vector<p2eg::SimpleCaloHit> ecalhits;
 
   for (const auto& hit : *pcalohits.product()) {
-    EcalEBPhase2TriggerPrimitiveDigi d = hit;
-    //const EBDetId TPid = d.id();
-
-    //const float enConv = 1998.36/4095;
-    //float et = d[0].encodedEt()*enConv;
-    //if(et > 0) std::cout<<"encoded Et: "<<std::hex<<d[0].encodedEt()<<"\t"<<"et: "<<et<<std::endl;
-
-    float et = d[0].encodedEt() * 0.125;
-    //float eta = TPid.approxEta();
-    //float phi = (TPid.iphi()*(M_PI/180));
-    //std::cout<<et<<"\t"<<eta<<"\t"<<phi<<std::endl;
-    //if (hit.encodedEt() > 0)  // hit.encodedEt() returns an int corresponding to 2x the crystal Et
+    float et = hit[0].encodedEt() * p2eg::ECAL_LSB;
     if (et > 0)
     {
-      // Et is 10 bit, by keeping the ADC saturation Et at 120 GeV it means that you have to multiply by 0.125 (input LSB)
-      //float et = hit.encodedEt() * 0.125;
       if (et < p2eg::cut_500_MeV) {
         continue;  // Reject hits with < 500 MeV ET
       }
@@ -162,7 +149,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
       ehit.setPosition(GlobalVector(cell->getPosition().x(), cell->getPosition().y(), cell->getPosition().z()));
       ehit.setEnergy(et);
       ehit.setEt_uint(
-          (ap_uint<10>)et>>21); //assuming LSB = 0.125
+          (ap_uint<10>)et); //assuming LSB = 0.5
       ehit.setPt();
       ecalhits.push_back(ehit);
     }
