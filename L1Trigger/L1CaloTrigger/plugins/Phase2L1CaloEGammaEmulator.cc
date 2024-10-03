@@ -134,9 +134,9 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
   std::vector<p2eg::SimpleCaloHit> ecalhits;
 
   for (const auto& hit : *pcalohits.product()) {
-    float et = hit[0].encodedEt() * p2eg::ECAL_LSB;
-    if (et > 0)
+    if (hit[0].encodedEt() > 0)
     {
+      float et = hit[0].encodedEt() * p2eg::ECAL_LSB;
       if (et < p2eg::cut_500_MeV) {
         continue;  // Reject hits with < 500 MeV ET
       }
@@ -149,7 +149,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
       ehit.setPosition(GlobalVector(cell->getPosition().x(), cell->getPosition().y(), cell->getPosition().z()));
       ehit.setEnergy(et);
       ehit.setEt_uint(
-          (ap_uint<10>)et); //assuming LSB = 0.5
+          (ap_uint<10>) hit[0].encodedEt()); //assuming LSB = 0.5
       ehit.setPt();
       ecalhits.push_back(ehit);
     }
