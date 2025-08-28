@@ -6,36 +6,18 @@
 
 #include "helper.h"  // assert_no_abort
 
-PtAssignmentEngineDxy::PtAssignmentEngineDxy() : graphDefDxy_(nullptr), sessionDxy_(nullptr), loader(hls4mlEmulator::ModelLoader("/afs/cern.ch/work/p/pdas/emtf/emulator_mismatch/CMSSW_15_0_10_patch3/src/EMTFTools/EMTF_NN/EMTFnn_v1")) {
-  model = loader.load_model();
+PtAssignmentEngineDxy::PtAssignmentEngineDxy() {
 }
 
 PtAssignmentEngineDxy::~PtAssignmentEngineDxy() {
-  if (sessionDxy_ != nullptr) {
-    tensorflow::closeSession(sessionDxy_);
-  }
-  delete graphDefDxy_;
 }
 
-void PtAssignmentEngineDxy::configure(int verbose, const std::string pbFileNameDxy) {
+void PtAssignmentEngineDxy::configure(int verbose, const std::string nnModel) {
+  nnModel_ = nnModel;
   verbose_ = verbose;
-
-  pbFileNameDxy_ = pbFileNameDxy;
-  std::string pbFilePathDxy_ = "L1Trigger/L1TMuon/data/emtf_luts/" + pbFileNameDxy_;
-
-  inputNameDxy_ = "input1";
-  outputNamesDxy_ = {"Identity"};
-
-  if (graphDefDxy_ == nullptr) {
-    graphDefDxy_ = tensorflow::loadGraphDef(edm::FileInPath(pbFilePathDxy_).fullPath());
-  }
-  emtf_assert(graphDefDxy_ != nullptr);
-
-  if (sessionDxy_ == nullptr) {
-    sessionDxy_ = tensorflow::createSession(graphDefDxy_);
-  }
-
-  emtf_assert(sessionDxy_ != nullptr);
+  std::string nnModelDxy_ = "/afs/cern.ch/work/p/pdas/emtf/emulator_mismatch/CMSSW_15_0_10_patch3/src/EMTFTools/EMTF_NN/" + nnModel_ + "/" + nnModel_;
+  loader = std::make_unique<hls4mlEmulator::ModelLoader>(nnModelDxy_);
+  model = loader->load_model();
 }
 
 const PtAssignmentEngineAux2017& PtAssignmentEngineDxy::aux() const {
@@ -48,7 +30,7 @@ void PtAssignmentEngineDxy::calculate_pt_dxy(const EMTFTrack& track,
                                              emtf::Prediction& prediction) const {
   // This is called for each track instead of for entire track collection as was done in Phase-2 implementation
   preprocessing_dxy(track, feature);
-  call_tensorflow_dxy(feature, prediction);
+  call_hls_dxy(feature, prediction);
   return;
 }
 
@@ -155,10 +137,8 @@ void PtAssignmentEngineDxy::preprocessing_dxy(const EMTFTrack& track, emtf::Feat
   return;
 }
 
-void PtAssignmentEngineDxy::call_tensorflow_dxy(const emtf::Feature& feature, emtf::Prediction& prediction) const {
-  std::cout<<"Inside call_tensorflow_dxy: "<<std::endl;
-  tensorflow::Tensor input(tensorflow::DT_FLOAT, {1, emtf::NUM_FEATURES});
-  std::vector<tensorflow::Tensor> outputs;
+void PtAssignmentEngineDxy::call_hls_dxy(const emtf::Feature& feature, emtf::Prediction& prediction) const {
+  std::cout<<"Inside call_hls_dxy: "<<std::endl;
   emtf_assert(feature.size() == emtf::NUM_FEATURES);
 
   ap_uint<13> nn_input[29];
@@ -171,18 +151,11 @@ void PtAssignmentEngineDxy::call_tensorflow_dxy(const emtf::Feature& feature, em
   model->read_result(nn_output);
   ap_uint<8> pT = nn_output[0];
   ap_uint<7> dxy = (nn_output[1] > 127)? ap_uint<7>(127) : ap_uint<7>(nn_output[1]);
-  std::cout<<pT.to_float()<<"\t"<<dxy.to_float()<<std::endl;
 
-  float* d = input.flat<float>().data();
-  std::copy(feature.begin(), feature.end(), d);
-  tensorflow::run(sessionDxy_, {{inputNameDxy_, input}}, outputNamesDxy_, &outputs);
-  emtf_assert(outputs.size() == 1);
   emtf_assert(prediction.size() == emtf::NUM_PREDICTIONS);
 
-  std::cout<<outputs[0].matrix<float>()(0, 0)<<"\t"<<outputs[0].matrix<float>()(0, 1)<<std::endl;
-
-  prediction.at(0) = outputs[0].matrix<float>()(0, 0);
-  prediction.at(1) = outputs[0].matrix<float>()(0, 1);
+  prediction.at(0) = pT.to_float();
+  prediction.at(1) = dxy.to_float();
 
   return;
 }
