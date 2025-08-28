@@ -15,7 +15,7 @@ PtAssignmentEngineDxy::~PtAssignmentEngineDxy() {
 void PtAssignmentEngineDxy::configure(int verbose, const std::string nnModel) {
   nnModel_ = nnModel;
   verbose_ = verbose;
-  std::string nnModelDxy_ = "/afs/cern.ch/work/p/pdas/emtf/emulator_mismatch/CMSSW_15_0_10_patch3/src/EMTFTools/EMTF_NN/" + nnModel_ + "/" + nnModel_;
+  std::string nnModelDxy_ = "EMTFTools/EMTF_NN/" + nnModel_ + "/" + nnModel_;
   loader = std::make_unique<hls4mlEmulator::ModelLoader>(nnModelDxy_);
   model = loader->load_model();
 }
@@ -138,7 +138,6 @@ void PtAssignmentEngineDxy::preprocessing_dxy(const EMTFTrack& track, emtf::Feat
 }
 
 void PtAssignmentEngineDxy::call_hls_dxy(const emtf::Feature& feature, emtf::Prediction& prediction) const {
-  std::cout<<"Inside call_hls_dxy: "<<std::endl;
   emtf_assert(feature.size() == emtf::NUM_FEATURES);
 
   ap_uint<13> nn_input[29];
