@@ -12,6 +12,8 @@
 #include "L1Trigger/L1TMuonEndCap/interface/PtAssignmentEngineAux2017.h"
 #include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
+#include "ap_fixed.h"
+#include "hls4ml/emulator.h"
 
 class PtAssignmentEngineDxy {
 public:
@@ -37,6 +39,9 @@ protected:
   std::string pbFilePathDxy_;
   std::string inputNameDxy_;
   std::vector<std::string> outputNamesDxy_;
+
+  hls4mlEmulator::ModelLoader loader;
+  std::shared_ptr<hls4mlEmulator::Model> model;
 };
 
 #endif
