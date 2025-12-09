@@ -514,6 +514,9 @@ void L1CaloJetProducer::produce(edm::Event &iEvent, const edm::EventSetup &iSetu
   // Load the ECAL+HCAL tower sums coming from L1EGammaCrystalsEmulatorProducer.cc
   std::vector<SimpleCaloHit> l1CaloTowers;
 
+std::cout << " test " << std::endl ;
+LogDebug("L1CaloJetProducer") << "\n";
+
   iEvent.getByToken(l1TowerToken_, l1CaloTowerHandle);
   for (auto &hit : *l1CaloTowerHandle.product()) {
     SimpleCaloHit l1Hit;

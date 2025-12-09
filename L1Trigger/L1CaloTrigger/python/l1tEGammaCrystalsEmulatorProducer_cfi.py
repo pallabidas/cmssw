@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+print(" Hallo ")
+
 l1tEGammaClusterEmuProducer = cms.EDProducer("L1EGCrystalClusterEmulatorProducer",
    ecalTPEB = cms.InputTag("simEcalEBTriggerPrimitiveDigis"),
    hcalTP = cms.InputTag("simHcalTriggerPrimitiveDigis"),

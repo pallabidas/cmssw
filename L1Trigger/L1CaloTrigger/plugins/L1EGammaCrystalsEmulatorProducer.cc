@@ -411,6 +411,7 @@ L1EGCrystalClusterEmulatorProducer::L1EGCrystalClusterEmulatorProducer(const edm
       calib_(iConfig.getParameter<edm::ParameterSet>("calib")),
       caloGeometryTag_(esConsumes<CaloGeometry, CaloGeometryRecord>(edm::ESInputTag("", ""))),
       hbTopologyTag_(esConsumes<HcalTopology, HcalRecNumberingRecord>(edm::ESInputTag("", ""))) {
+  std::cout << " Producer " << std::endl ;
   produces<l1tp2::CaloCrystalClusterCollection>();
   produces<BXVector<l1t::EGamma> >();
   produces<l1tp2::CaloTowerCollection>("L1CaloTowerCollection");
@@ -420,6 +421,7 @@ L1EGCrystalClusterEmulatorProducer::~L1EGCrystalClusterEmulatorProducer() {}
 
 void L1EGCrystalClusterEmulatorProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
+
 
   edm::Handle<EcalEBTrigPrimDigiCollection> pcalohits;
   iEvent.getByToken(ecalTPEBToken_, pcalohits);
@@ -440,6 +442,8 @@ void L1EGCrystalClusterEmulatorProducer::produce(edm::Event& iEvent, const edm::
   // Get all the ECAL hits
   iEvent.getByToken(ecalTPEBToken_, pcalohits);
   std::vector<SimpleCaloHit> ecalhits;
+
+  std::cout << " Producer XXX " << std::endl ;
 
   for (const auto& hit : *pcalohits.product()) {
     if (hit.encodedEt() > 0)  // hit.encodedEt() returns an int corresponding to 2x the crystal Et
@@ -1106,6 +1110,13 @@ void L1EGCrystalClusterEmulatorProducer::produce(edm::Event& iEvent, const edm::
               getPhi_fromL2LinkCardTowerCrystal(
                   ii, ll, towerID_cluster_L2Card[ii][jj][ll], crystalID_cluster_L2Card[ii][jj][ll]),
               0.);
+	  
+              cout << " Energy " << energy_cluster_L2Card[ii][jj][ll] << " Eta " <<
+              getEta_fromL2LinkCardTowerCrystal(
+                  ii, ll, towerID_cluster_L2Card[ii][jj][ll], crystalID_cluster_L2Card[ii][jj][ll]) << " Phi " <<
+              getPhi_fromL2LinkCardTowerCrystal(
+                  ii, ll, towerID_cluster_L2Card[ii][jj][ll], crystalID_cluster_L2Card[ii][jj][ll]) << endl ;
+
           SimpleCaloHit centerhit;
           bool is_iso = passes_iso(energy_cluster_L2Card[ii][jj][ll], isolation_cluster_L2Card[ii][jj][ll]);
           bool is_looseTkiso =

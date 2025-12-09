@@ -2,6 +2,7 @@
 #define L1TRIGGER_L1CALOTRIGGER_PHASE2L1CALOJETEMULATOR_H
 
 #include "DataFormats/L1TCalorimeterPhase2/interface/Phase2L1CaloJet.h"
+#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedL1CaloJet.h"
 #include <cstdlib>
 
 static constexpr int nBarrelEta = 34;

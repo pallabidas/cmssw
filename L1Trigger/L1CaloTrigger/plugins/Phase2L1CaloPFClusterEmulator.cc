@@ -32,6 +32,7 @@
 #include "DataFormats/L1TCalorimeterPhase2/interface/CaloCrystalCluster.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/CaloTower.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/CaloPFCluster.h"
+#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedPFClusterCorrelatorTMI18.h"
 #include "DataFormats/L1Trigger/interface/EGamma.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
 #include "SimDataFormats/CaloHit/interface/PCaloHitContainer.h"
@@ -46,6 +47,40 @@
 #include <cstdio>
 #include "L1Trigger/L1CaloTrigger/interface/Phase2L1CaloPFClusterEmulator.h"
 
+//    l1tp2::DigitizedPFClusterCorrelatorTMI18 createDigitizedOFClusterCorrelatorTMI18(ap_uint<12> et, ap_uint<7> abseta, ap_uint<7> absphi, int corrTowPhiOffset) {
+    l1tp2::DigitizedPFClusterCorrelatorTMI18 createDigitizedOFClusterCorrelatorTMI18(float et, float abseta, float absphi, int corrTowPhiOffset) {
+
+	  ap_uint<20> spare = 0 ;
+	  
+	  ap_uint<12> pf_et = (ap_uint<12>)(2*et) ;
+	  ap_uint<7>  pf_eta = (ap_uint<7>)(abs(abseta/1.45*85)) ;
+	  ap_int<7>   pf_phi ;
+	  float phivscenter ; 
+
+	  if(abseta > 0) spare = 4 ; // 3rd bit encode PosEta
+
+	  absphi -= 0.525 ;
+	 
+	  if(absphi>=-1.575 && absphi < -0.525) { phivscenter = absphi + 1.05 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;  spare = spare | 3 ; }  // first 2 bits encode slr 1 or 3
+	  if(absphi>=-0.525 && absphi < 0.525) { phivscenter = absphi ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;  spare = spare | 1 ; } 
+	  if(absphi>=0.525 && absphi < 1.575) { phivscenter = absphi - 1.05 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;  spare = spare | (8+3) ; } // bits 3 and 4 encode the cards 0 1 3 as 0  8  16 
+	  if(absphi>=1.575 && absphi < 2.625) { phivscenter = absphi - 2.1 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;  spare = spare | (8+1) ; } 
+	  if(absphi>=2.625 ) { phivscenter = absphi - 3.15 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;  spare = spare | (16+3) ; } 
+	  if(absphi<-2.625) { phivscenter = absphi + 3.15 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;   spare = spare | (16+3) ; } 
+	  if(absphi>=-2.625 && absphi < -1.575) { phivscenter = absphi + 2.1 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ;  spare = spare | (16+1) ; } 
+
+
+      return l1tp2::DigitizedPFClusterCorrelatorTMI18(
+          pf_et,  // technically we are just multiplying and then dividing again by the LSB
+          pf_eta,
+	  pf_phi,
+          pf_et,
+          0x3F,
+          spare,
+          0,
+          true) ;
+
+    }
 //
 // class declaration
 //
@@ -74,6 +109,7 @@ Phase2L1CaloPFClusterEmulator::Phase2L1CaloPFClusterEmulator(const edm::Paramete
       hfToken_(consumes<HcalTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("hcalDigis"))),
       decoderTag_(esConsumes<CaloTPGTranscoder, CaloTPGRecord>(edm::ESInputTag("", ""))) {
   produces<l1tp2::CaloPFClusterCollection>("GCTPFCluster");
+  produces<l1tp2::DigitizedPFClusterCorrelatorCollectionTMI18>("GCTDigitizedPFClusterToCorrelatorTMI18");
 }
 
 //
@@ -84,6 +120,7 @@ Phase2L1CaloPFClusterEmulator::Phase2L1CaloPFClusterEmulator(const edm::Paramete
 void Phase2L1CaloPFClusterEmulator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
   std::unique_ptr<l1tp2::CaloPFClusterCollection> pfclusterCands(make_unique<l1tp2::CaloPFClusterCollection>());
+  std::unique_ptr<l1tp2::DigitizedPFClusterCorrelatorCollectionTMI18> pfclusterCandsTMI18(make_unique<l1tp2::DigitizedPFClusterCorrelatorCollectionTMI18>());
 
   edm::Handle<std::vector<l1tp2::CaloTower>> caloTowerCollection;
   iEvent.getByToken(caloTowerToken_, caloTowerCollection);
@@ -112,6 +149,7 @@ void Phase2L1CaloPFClusterEmulator::produce(edm::Event& iEvent, const edm::Event
   }
 
   //Assign ETs to 36 21x8 regions
+//  std::cout << " PF " << std::endl ;
 
   for (int ieta = 0; ieta < nTowerEtaSLR; ieta++) {
     for (int iphi = 0; iphi < nTowerPhiSLR; iphi++) {
@@ -169,6 +207,16 @@ void Phase2L1CaloPFClusterEmulator::produce(edm::Event& iEvent, const edm::Event
       l1CaloPFCluster.setClusterEta(towereta);
       l1CaloPFCluster.setClusterPhi(towerphi);
       pfclusterCands->push_back(l1CaloPFCluster);
+      l1tp2::DigitizedPFClusterCorrelatorTMI18 l1CaloPFClusterTMI18 ;
+      int ggg = 0 ;
+      l1CaloPFClusterTMI18 = createDigitizedOFClusterCorrelatorTMI18(tempPfclusters.GCTpfclusters[i].et, towereta, towerphi, ggg) ;
+      pfclusterCandsTMI18->push_back(l1CaloPFClusterTMI18);
+//      if(tempPfclusters.GCTpfclusters[i].et > 20) std::cout << " ...... " << pfclusterCandsTMI18->size() << 
+//			" Et " << tempPfclusters.GCTpfclusters[i].et <<
+//			" Eta " << gcteta <<
+//			" Phi " << gctphi <<
+//			" EtaTower " << towereta <<
+//			" PhiTower " << towerphi << std::endl ;
     }
   }
 
@@ -297,6 +345,7 @@ void Phase2L1CaloPFClusterEmulator::produce(edm::Event& iEvent, const edm::Event
   }
 
   iEvent.put(std::move(pfclusterCands), "GCTPFCluster");
+  iEvent.put(std::move(pfclusterCandsTMI18), "GCTDigitizedPFClusterToCorrelatorTMI18");
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------

@@ -33,6 +33,7 @@
 #include "DataFormats/L1TCalorimeterPhase2/interface/CaloTower.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/CaloPFCluster.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/Phase2L1CaloJet.h"
+#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedL1CaloJet.h"
 #include "DataFormats/L1Trigger/interface/EGamma.h"
 #include "DataFormats/L1THGCal/interface/HGCalTower.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
@@ -212,6 +213,7 @@ Phase2L1CaloJetEmulator::Phase2L1CaloJetEmulator(const edm::ParameterSet& iConfi
   }
 
   produces<l1tp2::Phase2L1CaloJetCollection>("GCTJet");
+  produces<l1tp2::DigitizedL1CaloJetCollection>("GCTDigitizedJet");
 }
 
 Phase2L1CaloJetEmulator::~Phase2L1CaloJetEmulator() {}
@@ -224,11 +226,13 @@ Phase2L1CaloJetEmulator::~Phase2L1CaloJetEmulator() {}
 void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
   std::unique_ptr<l1tp2::Phase2L1CaloJetCollection> jetCands(make_unique<l1tp2::Phase2L1CaloJetCollection>());
+  std::unique_ptr<l1tp2::DigitizedL1CaloJetCollection> DigitizedJetCands(make_unique<l1tp2::DigitizedL1CaloJetCollection>());
 
   // Assign ETs to each eta-half of the barrel region (17x72 --> 18x72 to be able to make 3x3 super towers)
   edm::Handle<std::vector<l1tp2::CaloTower>> caloTowerCollection;
   if (!iEvent.getByToken(caloTowerToken_, caloTowerCollection))
     edm::LogError("Phase2L1CaloJetEmulator") << "Failed to get towers from caloTowerCollection!";
+
 
   iEvent.getByToken(caloTowerToken_, caloTowerCollection);
   float GCTintTowers[nBarrelEta][nBarrelPhi];
@@ -679,9 +683,13 @@ void Phase2L1CaloJetEmulator::produce(edm::Event& iEvent, const edm::EventSetup&
   std::sort(allJets.begin(), allJets.end(), gctobj::compareByEt);
   for (size_t i = 0; i < allJets.size(); i++) {
     jetCands->push_back(allJets.at(i));
+    // Build digitized version from non-digitzed version
+    l1tp2::DigitizedL1CaloJet tempJet(true, allJets.at(i).jetEt(), allJets.at(i).jetPhi(), allJets.at(i).jetEta());
+    DigitizedJetCands->push_back(tempJet);
   }
 
   iEvent.put(std::move(jetCands), "GCTJet");
+  iEvent.put(std::move(DigitizedJetCands), "GCTDigitizedJet");
 }
 
 // Apply calibrations to HCAL energy based on Jet Eta, Jet pT

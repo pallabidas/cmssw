@@ -296,6 +296,7 @@ inline void p2eg::writeToCorrelatorAndGTOutputs(
     std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollection> const& gctDigitizedClustersCorrelator,
     std::unique_ptr<l1tp2::DigitizedTowerCorrelatorCollection> const& gctDigitizedTowersCorrelator,
     std::unique_ptr<l1tp2::DigitizedClusterGTCollection> const& gctDigitizedClustersGT,
+    std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollectionTMI18> const& gctDigitizedClustersCorrelatorTMI18,
     int nGCTCard,
     int fiberStart,
     int fiberEnd,
@@ -326,6 +327,7 @@ inline void p2eg::writeToCorrelatorAndGTOutputs(
       // The correlator clusters don't need to know the fiber offset.
       if (thisCluster.etFloat() > 0.0) {
         gctDigitizedClustersCorrelator->push_back(thisCluster.createDigitizedClusterCorrelator(corrTowPhiOffset));
+        gctDigitizedClustersCorrelatorTMI18->push_back(thisCluster.createDigitizedClusterCorrelatorTMI18(corrTowPhiOffset));
       }
 
       // Make l1tp2::DigitizedClusterGT.
@@ -371,6 +373,7 @@ inline void p2eg::algo_top(
     std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollection> const& gctDigitizedClustersCorrelator,
     std::unique_ptr<l1tp2::DigitizedTowerCorrelatorCollection> const& gctDigitizedTowersCorrelator,
     std::unique_ptr<l1tp2::DigitizedClusterGTCollection> const& gctDigitizedClustersGT,
+    std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollectionTMI18> const& gctDigitizedClustersCorrelatorTMI18,
     l1tp2::ParametricCalibration calib_) {
   //-------------------------//
   // Initialize the GCT area
@@ -417,6 +420,7 @@ inline void p2eg::algo_top(
                                       gctDigitizedClustersCorrelator,
                                       gctDigitizedTowersCorrelator,
                                       gctDigitizedClustersGT,
+                                      gctDigitizedClustersCorrelatorTMI18,
                                       nGCTCard,
                                       posEtaFiberStart,
                                       posEtaFiberEnd,
@@ -431,6 +435,7 @@ inline void p2eg::algo_top(
                                       gctDigitizedClustersCorrelator,
                                       gctDigitizedTowersCorrelator,
                                       gctDigitizedClustersGT,
+                                      gctDigitizedClustersCorrelatorTMI18,
                                       nGCTCard,
                                       negEtaFiberStart,
                                       negEtaFiberEnd,

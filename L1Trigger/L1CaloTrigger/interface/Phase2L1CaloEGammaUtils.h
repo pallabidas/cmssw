@@ -1263,6 +1263,32 @@ namespace p2eg {
           nGCTCard);
     }
 
+    l1tp2::DigitizedClusterCorrelatorTMI18 createDigitizedClusterCorrelatorTMI18(const int corrTowPhiOffset) const {
+
+          ap_uint<7> abseta = 0 ;
+          ap_uint<10> spare = 0 ;
+	  if(globalClusteriEta()>85) {abseta = globalClusteriEta() - 85 ; spare = 4 ; } 
+	  else { abseta = 85 - globalClusteriEta() ; spare = 0 ; }
+
+          ap_int<8> tmpphi = (((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) + crPhi) ;
+	  if( tmpphi < 60) {spare = spare | 3;}
+	  else {tmpphi = tmpphi - 60 ; spare = spare | 1 ;}
+          ap_int<7> phivscenter = ap_int<7>(tmpphi - 30) ;
+
+      return l1tp2::DigitizedClusterCorrelatorTMI18(
+          et,  // technically we are just multiplying and then dividing again by the LSB
+          abseta,
+	  phivscenter,
+	  ap_uint<6>(0x3F) ,
+	  ap_uint<6>(0x3F) ,
+	  ap_uint<6>(0x3F) ,
+	  ap_uint<3>(0x7) ,
+          ap_uint<5>(timing),
+          ap_uint<2>(brems),
+	  ap_uint<10>(spare) ,
+          nGCTCard, true ) ;
+    }
+
     /*
      * Create a l1tp2::DigitizedClusterGT object
      */
@@ -1418,7 +1444,7 @@ namespace p2eg {
       l1tp2::CaloTower l1CaloTower;
       // Store total Et (HCAL+ECAL) in the ECAL Et member
       l1CaloTower.setEcalTowerEt(totalEtFloat());
-      l1CaloTower.setHcalTowerEt(ecalEtFloat());
+      l1CaloTower.setHcalTowerEt(hcalEtFloat());
       int global_tower_iEta = globalToweriEtaFromGCTcardiEta(gctCard_tower_iEta);
       int global_tower_iPhi = globalToweriPhiFromGCTcardiPhi(nGCTCard, gctCard_tower_iPhi);
       l1CaloTower.setTowerIEta(global_tower_iEta);
@@ -1633,6 +1659,7 @@ namespace p2eg {
                 std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollection> const& gctDigitizedClustersCorrelator,
                 std::unique_ptr<l1tp2::DigitizedTowerCorrelatorCollection> const& gctDigitizedTowersCorrelator,
                 std::unique_ptr<l1tp2::DigitizedClusterGTCollection> const& gctDigitizedClustersGT,
+                std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollectionTMI18> const& gctDigitizedClustersCorrelatorTMI18,
                 l1tp2::ParametricCalibration calib_);
 
   GCTinternal_t getClustersTowers(const GCTcard_t& GCTcard, unsigned int nGCTCard);
@@ -1655,6 +1682,7 @@ namespace p2eg {
       std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollection> const& gctDigitizedClustersCorrelator,
       std::unique_ptr<l1tp2::DigitizedTowerCorrelatorCollection> const& gctDigitizedTowersCorrelator,
       std::unique_ptr<l1tp2::DigitizedClusterGTCollection> const& gctDigitizedClustersGT,
+      std::unique_ptr<l1tp2::DigitizedClusterCorrelatorCollectionTMI18> const& gctDigitizedClustersCorrelatorTMI18,
       int nGCTCard,
       int fiberStart,
       int fiberEnd,

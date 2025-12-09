@@ -42,6 +42,7 @@
 #include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedClusterCorrelator.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedTowerCorrelator.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedClusterGT.h"
+#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedClusterCorrelatorTMI18.h"
 
 #include "DataFormats/L1Trigger/interface/BXVector.h"
 #include "DataFormats/L1Trigger/interface/EGamma.h"
@@ -101,6 +102,7 @@ Phase2L1CaloEGammaEmulator::Phase2L1CaloEGammaEmulator(const edm::ParameterSet& 
   produces<l1tp2::DigitizedClusterCorrelatorCollection>("GCTDigitizedClusterToCorrelator");
   produces<l1tp2::DigitizedTowerCorrelatorCollection>("GCTDigitizedTowerToCorrelator");
   produces<l1tp2::DigitizedClusterGTCollection>("GCTDigitizedClusterToGT");
+  produces<l1tp2::DigitizedClusterCorrelatorCollectionTMI18>("GCTDigitizedClusterToCorrelatorTMI18");
 }
 
 void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -610,6 +612,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
   auto L1DigitizedClusterCorrelator = std::make_unique<l1tp2::DigitizedClusterCorrelatorCollection>();
   auto L1DigitizedTowerCorrelator = std::make_unique<l1tp2::DigitizedTowerCorrelatorCollection>();
   auto L1DigitizedClusterGT = std::make_unique<l1tp2::DigitizedClusterGTCollection>();
+  auto L1DigitizedClusterCorrelatorTMI18 = std::make_unique<l1tp2::DigitizedClusterCorrelatorCollectionTMI18>();
 
   //----------------------------------------------------
   // Apply the GCT firmware code to each GCT card
@@ -626,6 +629,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
                    L1DigitizedClusterCorrelator,
                    L1DigitizedTowerCorrelator,
                    L1DigitizedClusterGT,
+                   L1DigitizedClusterCorrelatorTMI18,
                    calib_);
   }
 
@@ -636,6 +640,7 @@ void Phase2L1CaloEGammaEmulator::produce(edm::Event& iEvent, const edm::EventSet
   iEvent.put(std::move(L1DigitizedClusterCorrelator), "GCTDigitizedClusterToCorrelator");
   iEvent.put(std::move(L1DigitizedTowerCorrelator), "GCTDigitizedTowerToCorrelator");
   iEvent.put(std::move(L1DigitizedClusterGT), "GCTDigitizedClusterToGT");
+  iEvent.put(std::move(L1DigitizedClusterCorrelatorTMI18), "GCTDigitizedClusterToCorrelatorTMI18");
 }
 
 //////////////////////////////////////////////////////////////////////////
