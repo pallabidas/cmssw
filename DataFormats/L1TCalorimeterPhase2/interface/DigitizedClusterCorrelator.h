@@ -94,7 +94,7 @@ namespace l1tp2 {
     // Constructor from float inputs
     DigitizedClusterCorrelator(float pt_f,
                                unsigned int iEtaCr,
-                               unsigned int iPhiCr,
+                               int iPhiCr,
                                unsigned int hoe,
                                unsigned int hoeFlag,
                                unsigned int iso,
@@ -124,7 +124,7 @@ namespace l1tp2 {
     ap_uint<8> eta() const { return ((clusterData >> 12) & 0xFF); }  // (eight 1's) 0b11111111 = 0xFF
 
     // crystal phi in the correlator region (LSB: 2pi/360)
-    ap_uint<7> phi() const { return ((clusterData >> 20) & 0x7F); }  // (seven 1's) 0b1111111 = 0x7F
+    ap_int<7> phi() const { return ((clusterData >> 20) & 0x7F); }  // (seven 1's) 0b1111111 = 0x7F
 
     // HoE value and flag: not defined yet in the emulator
     ap_uint<4> hoe() const { return ((clusterData >> 27) & 0xF); }      // (four 1's) 0b1111 = 0xF

@@ -98,10 +98,10 @@ namespace p2eg {
 
   // Outputs to correlator
   // Fixed number of EG and PF clusters per RCT card in each output SLR
-  static const int N_EG_CLUSTERS_PER_RCT_CARD = 9;
-  static const int N_PF_CLUSTERS_PER_RCT_CARD = 12;
+  static const int N_EG_CLUSTERS_PER_RCT_CARD = 4; // each eta side
+  static const int N_PF_CLUSTERS_PER_RCT_CARD = 6; // each eta side
   // Height of one SLR region in phi in degrees
-  static constexpr float PHI_RANGE_PER_SLR_DEGREES = 120;
+  static constexpr float PHI_RANGE_PER_SLR_DEGREES = 120; // including overlap
 
   //////////////////////////////////////////////////////////////////////////
   // RCT: indexing helper functions
@@ -1256,11 +1256,23 @@ namespace p2eg {
      * unique to each GCT card.
      */
     l1tp2::DigitizedClusterCorrelator createDigitizedClusterCorrelator(const int corrTowPhiOffset) const {
+	  // Sascha eta and phi
+          //ap_uint<7> abseta = 0 ;
+	  ap_uint<8> abseta = 0 ;
+          ap_uint<10> spare = 0 ;
+          if(globalClusteriEta()>85) {abseta = globalClusteriEta() - 85 ; spare = 4 ; }
+          else { abseta = 85 - globalClusteriEta() ; spare = 0 ; }
+
+          ap_int<8> tmpphi = (((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) + crPhi) ;
+          if( tmpphi < 60) {spare = spare | 3;}
+          else {tmpphi = tmpphi - 60 ; spare = spare | 1 ;}
+          ap_int<7> phivscenter = ap_int<7>(tmpphi - 30) ;
+	  //if (et > 20) std::cout<<"createDigitizedClusterCorrelator: "<<et<<"\t"<<abseta<<"\t"<<tmpphi<<"\t"<<phivscenter<<std::endl;
+
       return l1tp2::DigitizedClusterCorrelator(
           etFloat(),  // technically we are just multiplying and then dividing again by the LSB
-          globalClusteriEta(),
-          ((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) +
-              crPhi,  // cannot use globalClusteriPhi() helper function because correlator offset is different than GCT offset
+          abseta,
+          phivscenter,
           hoe,
           hoe_flag,
           iso,
