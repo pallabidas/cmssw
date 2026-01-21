@@ -51,8 +51,8 @@ Phase2L1CaloToCorrelatorTMI18::Phase2L1CaloToCorrelatorTMI18( const edm::Paramet
   gctEmDigiClustersSrc_(consumes<l1tp2::GCTEmDigiClusterCollection>(cfg.getParameter<edm::InputTag>("gctEmDigiClusters"))),
   gctHadDigiClustersSrc_(consumes<l1tp2::GCTHadDigiClusterCollection>(cfg.getParameter<edm::InputTag>("gctHadDigiClusters")))
 {
-produces<l1tp2::DigitizedCaloToCorrelatorCollectionTMI18>("DigitizedCaloToCorrelatorTMI18");
- }
+  produces<l1tp2::DigitizedCaloToCorrelatorCollectionTMI18>("DigitizedCaloToCorrelatorTMI18");
+}
 
 void Phase2L1CaloToCorrelatorTMI18::produce( edm::Event& evt, const edm::EventSetup& es )
  {
@@ -78,6 +78,9 @@ void Phase2L1CaloToCorrelatorTMI18::produce( edm::Event& evt, const edm::EventSe
   ap_uint<64> dataToCL1Card0[162] = {0} ;
   ap_uint<64> dataToCL1Card1[162] = {0} ;
   ap_uint<64> dataToCL1Card2[162] = {0} ;
+  l1tp2::GCTDigiClusterLink clusterCollCard0(162);
+  l1tp2::GCTDigiClusterLink clusterCollCard1(162);
+  l1tp2::GCTDigiClusterLink clusterCollCard2(162);
 
   // SLR1 and SLR3 both send 24 PFclusters each from +ve and -ve eta, total 48 words: 4x12(x64b)
 
@@ -107,16 +110,19 @@ slr3posp:  ;
 
         if(iGCT == 0 && cntr03pos < 24){
           dataToCL1Card0[17+cntr03pos] = mydata;
+	  clusterCollCard0[17+cntr03pos] = cluster;
           cntr03pos++;  
           goto fillendp;
         } 
         if(iGCT == 1 && cntr13pos < 24){
           dataToCL1Card1[17+cntr13pos] = mydata;
+	  clusterCollCard1[17+cntr13pos] = cluster;
           cntr13pos++;
           goto fillendp;
         } 
         if(iGCT == 2 && cntr23pos < 24){
           dataToCL1Card2[17+cntr23pos] = mydata;
+	  clusterCollCard2[17+cntr23pos] = cluster;
           cntr23pos++;
           goto fillendp;
         } 
@@ -126,16 +132,19 @@ slr3negp:  ;
 
         if(iGCT == 0 && cntr03neg < 24){
           dataToCL1Card0[57+cntr03neg] = mydata;
+	  clusterCollCard0[57+cntr03neg] = cluster;
           cntr03neg++;
           goto fillendp;
         } 
         if(iGCT == 1 && cntr13neg < 24){
           dataToCL1Card1[57+cntr13neg] = mydata;
+	  clusterCollCard1[57+cntr13neg] = cluster;
           cntr13neg++;
           goto fillendp;
         } 
         if(iGCT == 2 && cntr23neg < 24){
           dataToCL1Card2[57+cntr23neg] = mydata;
+	  clusterCollCard2[57+cntr23neg] = cluster;
           cntr23neg++;
           goto fillendp;
         } 
@@ -145,16 +154,19 @@ slr1posp:  ;
 
         if(iGCT == 0 && cntr01pos < 24){
           dataToCL1Card0[81+17+cntr01pos] = mydata;
+	  clusterCollCard0[81+17+cntr01pos] = cluster;
           cntr01pos++;
           goto fillendp;
         } 
         if(iGCT == 1 && cntr11pos < 24){
           dataToCL1Card1[81+17+cntr11pos] = mydata;
+	  clusterCollCard1[81+17+cntr11pos] = cluster;
           cntr11pos++;
           goto fillendp;
         } 
         if(iGCT == 2 && cntr21pos < 24){
           dataToCL1Card2[81+17+cntr21pos] = mydata;
+	  clusterCollCard2[81+17+cntr21pos] = cluster;
           cntr21pos++;
           goto fillendp;
         } 
@@ -164,16 +176,19 @@ slr1negp:  ;
 
         if(iGCT == 0 && cntr01neg < 24){
           dataToCL1Card0[81+57+cntr01neg] = mydata;
+	  clusterCollCard0[81+57+cntr01neg] = cluster;
           cntr01neg++;
           goto fillendp;
         } 
         if(iGCT == 1 && cntr11neg < 24){
           dataToCL1Card1[81+57+cntr11neg] = mydata;
+	  clusterCollCard1[81+57+cntr11neg] = cluster;
           cntr11neg++;
           goto fillendp;
         } 
         if(iGCT == 2 && cntr21neg < 24){
           dataToCL1Card2[81+57+cntr21neg] = mydata;
+	  clusterCollCard2[81+57+cntr21neg] = cluster;
           cntr21neg++;
           goto fillendp; 
         } 
@@ -224,16 +239,19 @@ slr3pos:  ;
 
         if(iGCT == 0 && cntr03pos < 16){
           dataToCL1Card0[1+cntr03pos] = mydata;
+	  clusterCollCard0[1+cntr03pos] = cluster;
           cntr03pos++;
           goto fillend;
         } 
         if(iGCT == 1 && cntr13pos < 16){
           dataToCL1Card1[1+cntr13pos] = mydata;
+	  clusterCollCard1[1+cntr13pos] = cluster;
           cntr13pos++;
           goto fillend;
         } 
         if(iGCT == 2 && cntr23pos < 16){
           dataToCL1Card2[1+cntr23pos] = mydata;
+	  clusterCollCard2[1+cntr23pos] = cluster;
           cntr23pos++;
           goto fillend;
         }
@@ -243,16 +261,19 @@ slr3neg:  ;
 
         if(iGCT == 0 && cntr03neg < 16){
           dataToCL1Card0[41+cntr03neg] = mydata;
+	  clusterCollCard0[41+cntr03neg] = cluster;
           cntr03neg++;
           goto fillend;
         } 
         if(iGCT == 1 && cntr13neg < 16){
           dataToCL1Card1[41+cntr13neg] = mydata;
+	  clusterCollCard1[41+cntr13neg] = cluster;
           cntr13neg++;
           goto fillend;
         } 
         if(iGCT == 2 && cntr23neg < 16){
           dataToCL1Card2[41+cntr23neg] = mydata;
+	  clusterCollCard2[41+cntr23neg] = cluster;
           cntr23neg++;
           goto fillend;
         }
@@ -262,16 +283,19 @@ slr1pos:  ;
 
         if(iGCT == 0 && cntr01pos < 16){
           dataToCL1Card0[81+1+cntr01pos] = mydata;
+	  clusterCollCard0[81+1+cntr01pos] = cluster;
           cntr01pos++;
           goto fillend;
         } 
         if(iGCT == 1 && cntr11pos < 16){
           dataToCL1Card1[81+1+cntr11pos] = mydata;
+	  clusterCollCard1[81+1+cntr11pos] = cluster;
           cntr11pos++;
           goto fillend;
         } 
         if(iGCT == 2 && cntr21pos < 16){
           dataToCL1Card2[81+1+cntr21pos] = mydata;
+	  clusterCollCard2[81+1+cntr21pos] = cluster;
           cntr21pos++;
           goto fillend;
         }
@@ -281,16 +305,19 @@ slr1neg:  ;
 
         if(iGCT == 0 && cntr01neg < 16){
           dataToCL1Card0[81+41+cntr01neg] = mydata;
+	  clusterCollCard0[81+41+cntr01neg] = cluster;
           cntr01neg++;
           goto fillend;
         } 
         if(iGCT == 1 && cntr11neg < 16){
-          dataToCL1Card1[81+41+cntr11neg] = mydata ;
+          dataToCL1Card1[81+41+cntr11neg] = mydata;
+	  clusterCollCard1[81+41+cntr11neg] = cluster;
           cntr11neg++ ;
           goto fillend ;
         } 
         if(iGCT == 2 && cntr21neg < 16){
-          dataToCL1Card2[81+41+cntr21neg] = mydata ;
+          dataToCL1Card2[81+41+cntr21neg] = mydata;
+	  clusterCollCard2[81+41+cntr21neg] = cluster;
           cntr21neg++ ;
           goto fillend ;
         }
@@ -299,7 +326,8 @@ fillend:  ;
       }
     }
   }
-  l1tp2::DigitizedCaloToCorrelatorTMI18 l1CaloTMI18 = l1tp2::DigitizedCaloToCorrelatorTMI18(dataToCL1Card0, dataToCL1Card1, dataToCL1Card2) ;
+
+  l1tp2::DigitizedCaloToCorrelatorTMI18 l1CaloTMI18 = l1tp2::DigitizedCaloToCorrelatorTMI18(dataToCL1Card0, dataToCL1Card1, dataToCL1Card2, clusterCollCard0, clusterCollCard1, clusterCollCard2) ;
   caloCandsTMI18->push_back(l1CaloTMI18) ;
   evt.put(std::move(caloCandsTMI18), "DigitizedCaloToCorrelatorTMI18");
  
