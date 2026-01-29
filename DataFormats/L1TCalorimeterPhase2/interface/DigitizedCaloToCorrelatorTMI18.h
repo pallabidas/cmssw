@@ -5,7 +5,6 @@
 #include <vector>
 #include "DataFormats/L1TCalorimeterPhase2/interface/GCTEmDigiCluster.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/GCTHadDigiCluster.h"
-#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedClusterCorrelator.h"
 
 namespace l1tp2 {
 
@@ -14,7 +13,7 @@ namespace l1tp2 {
 
   class DigitizedCaloToCorrelatorTMI18 {
   private:
-    // Data
+    // Data (to remove)
     ap_uint<64> Card0Data[162] ;
     ap_uint<64> Card1Data[162] ;
     ap_uint<64> Card2Data[162] ;

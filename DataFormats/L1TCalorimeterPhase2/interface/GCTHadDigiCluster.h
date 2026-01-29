@@ -27,29 +27,13 @@ namespace l1tp2 {
 
     GCTHadDigiCluster(ap_uint<64> data) { clusterData = data; }
 
-    // Note types of the constructor
-    //GCTHadDigiCluster(ap_uint<12> pt, int etaCr, int phiCr, ap_uint<4> hoe) {
-    //  // To use .range() we need an ap class member
-    //  ap_uint<64> temp_data;
-
-    //  ap_uint<7> etaCrDigitized = abs(etaCr);
-    //  ap_int<7> phiCrDigitized = phiCr;
-
-    //  temp_data.range(11, 0) = pt.range();
-    //  temp_data.range(18, 12) = etaCrDigitized.range();
-    //  temp_data.range(25, 19) = phiCrDigitized.range();
-
-    //  clusterData = temp_data;
-    //}
     GCTHadDigiCluster(ap_uint<12> pt,
                                ap_uint<7> eta,
                                ap_int<7> phi,
                                ap_uint<12> ecal,
                                ap_uint<6> fb,
                                ap_uint<20> spare,
-                               int iGCTCard,
-                               bool fullydigitizedInputs) {
-      (void)fullydigitizedInputs;
+                               int iGCTCard) {
       clusterData = ((ap_uint<64>)pt) | (((ap_uint<64>)eta) << 12) | (((ap_uint<64>)phi) << 19) |
                     (((ap_uint<64>)ecal) << 26) | (((ap_uint<64>)fb) << 38) |
                     (((ap_uint<64>)spare << 44));
@@ -89,7 +73,7 @@ namespace l1tp2 {
     bool passNullBitsCheck(void) const { return ((data() >> unusedBitsStart()) == 0); }
 
     // Get the underlying ref
-    edm::Ref<l1tp2::CaloPFClusterCollection> clusterRef() const { return clusterRef_; }
+    const edm::Ref<l1tp2::CaloPFClusterCollection>& clusterRef() const { return clusterRef_; }
   };
 
   // Collection typedefs

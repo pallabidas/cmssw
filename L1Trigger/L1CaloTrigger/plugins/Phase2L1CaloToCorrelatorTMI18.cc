@@ -5,15 +5,10 @@
 #include <array>
 #include <cmath>
 #include <typeinfo>
-// #include <cstdint>
 #include <iostream>
 #include <fstream>
 #include <memory>
 #include <vector>
-#include <TLorentzVector.h>
-#ifdef __MAKECINT__
-#pragma link C++ class vector<TLorentzVector>+;
-#endif
 
 // user include files
 #include "FWCore/Framework/interface/stream/EDProducer.h"
@@ -26,8 +21,6 @@
 
 #include "L1Trigger/L1CaloTrigger/interface/Phase2L1CaloToCorrelatorTMI18.h"
 
-//#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedClusterCorrelatorTMI18.h"
-//#include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedPFClusterCorrelatorTMI18.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/GCTEmDigiCluster.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/GCTHadDigiCluster.h"
 #include "DataFormats/L1TCalorimeterPhase2/interface/DigitizedCaloToCorrelatorTMI18.h"

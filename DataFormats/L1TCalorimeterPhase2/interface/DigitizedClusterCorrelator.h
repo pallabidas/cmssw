@@ -31,39 +31,6 @@ namespace l1tp2 {
     static constexpr int correlatorCard1_tower_iphi_offset = 44;
     static constexpr int correlatorCard2_tower_iphi_offset = 68;
 
-    // Private member functions to perform digitization
-    ap_uint<12> digitizePt(float pt_f) {
-      float maxPt_f = (std::pow(2, n_bits_pt) - 1) * LSB_PT;
-      // If pT exceeds the maximum (extremely unlikely), saturate the value
-      if (pt_f >= maxPt_f) {
-        return (ap_uint<12>)0xFFF;
-      }
-
-      return (ap_uint<12>)(pt_f / LSB_PT);
-    }
-
-    ap_uint<7> digitizeEta(unsigned int iEtaCr) { return (ap_uint<7>)iEtaCr; }
-
-    ap_uint<7> digitizePhi(unsigned int iPhiCr) { return (ap_uint<7>)iPhiCr; }
-
-    // To-do: HoE is not defined for clusters
-    ap_uint<6> digitizeHoE(unsigned int hoe) { return (ap_uint<6>)hoe; }
-
-    ap_uint<6> digitizeIso(unsigned int iso) { return (ap_uint<6>)iso; }
-    ap_uint<6> digitizeShape(unsigned int shape) { return (ap_uint<6>)shape; }
-
-    // To-do: WP: no information yet
-    ap_uint<3> digitizeWP(unsigned int wp) { return (ap_uint<3>)wp; }
-
-    // To-do: timing: no information yet
-    ap_uint<5> digitizeTiming(unsigned int timing) { return (ap_uint<5>)timing; }
-
-    // TO-DO: Brems: was brems applied (NOT STORED YET IN GCT)
-    ap_uint<2> digitizeBrems(unsigned int brems) { return (ap_uint<2>)brems; }
-
-    // TO-DO: Spare
-    ap_uint<10> digitizeSpare(unsigned int spare) { return (ap_uint<10>)spare; }
-
   public:
     DigitizedClusterCorrelator() { clusterData = 0x0; }
 
@@ -146,8 +113,9 @@ namespace l1tp2 {
       int tmpphi = thisPhi;
       bool wrapped = ((spare() & 0x2) == 0);
       if (wrapped) { tmpphi = thisPhi + 60; } // add back the offset from L1Trigger/L1CaloTrigger/interface/Phase2L1CaloEGammaUtils.h
-      int crPhi = phi() % 5;
+      int crPhi = 0;
       if (phi() < 0) crPhi = (30 + phi()) % 5;
+      else crPhi = phi() % 5;
       int towPhi = (tmpphi - crPhi) / 5  + 4; // corrTowPhiOffset = 4
 
       int iPhi_in_gctCard = (towPhi * 5) + crPhi;
@@ -163,7 +131,6 @@ namespace l1tp2 {
       if (phiInDegrees > 160 && phiInDegrees < 280) cardnumber = 0;
       if ((phiInDegrees > 280 && phiInDegrees < 360) || phiInDegrees < 40) cardnumber = 1;
       if (phiInDegrees > 40 && phiInDegrees < 160) cardnumber = 2;
-      if (pt() == 96) std::cout<<realPhi()<<"\t"<<phiInDegrees<<"\t"<<cardnumber<<std::endl;
       return cardnumber;
     }
 

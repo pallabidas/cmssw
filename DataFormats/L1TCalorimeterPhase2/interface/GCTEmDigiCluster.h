@@ -31,36 +31,6 @@ namespace l1tp2 {
 
     GCTEmDigiCluster(ap_uint<64> data) { clusterData = data; }
 
-    //GCTEmDigiCluster(ap_uint<12> pt,
-    //                 int etaCr,
-    //                 int phiCr,
-    //                 ap_uint<4> hoe,
-    //                 ap_uint<2> hoeFlag,
-    //                 ap_uint<3> iso,
-    //                 ap_uint<2> isoFlag,
-    //                 ap_uint<6> fb,
-    //                 ap_uint<5> timing,
-    //                 ap_uint<2> shapeFlag,
-    //                 ap_uint<2> brems) {
-    //  // To use .range() we need an ap class member
-    //  ap_uint<64> temp_data;
-    //  ap_uint<7> etaCrDigitized = abs(etaCr);
-    //  ap_int<7> phiCrDigitized = phiCr;
-
-    //  temp_data.range(11, 0) = pt.range();
-    //  temp_data.range(18, 12) = etaCrDigitized.range();
-    //  temp_data.range(25, 19) = phiCrDigitized.range();
-    //  temp_data.range(29, 26) = hoe.range();
-    //  temp_data.range(31, 30) = hoeFlag.range();
-    //  temp_data.range(34, 32) = iso.range();
-    //  temp_data.range(36, 35) = isoFlag.range();
-    //  temp_data.range(42, 37) = fb.range();
-    //  temp_data.range(47, 43) = timing.range();
-    //  temp_data.range(49, 48) = shapeFlag.range();
-    //  temp_data.range(51, 50) = brems.range();
-
-    //  clusterData = temp_data;
-    //}
     GCTEmDigiCluster(ap_uint<12> pt,
                                ap_uint<7> eta,
                                ap_int<7> phi,
@@ -71,10 +41,7 @@ namespace l1tp2 {
                                ap_uint<5> timing,
                                ap_uint<2> brems,
                                ap_uint<10> spare,
-			       int iGCTCard,
-                               bool fullydigitizedInputs) {
-      (void)fullydigitizedInputs;
-      //if(pt > 20) std::cout<<"GCTEmDigiCluster phi: "<<phi<<std::endl;
+			       int iGCTCard) {
       clusterData = ((ap_uint<64>)pt) | (((ap_uint<64>)eta) << 12) | (((ap_uint<64>)phi) << 19) |
                     (((ap_uint<64>)hoe) << 26) | (((ap_uint<64>)iso) << 32) |
                     (((ap_uint<64>)shape) << 38) | (((ap_uint<64>)wp) << 44) | (((ap_uint<64>)timing) << 47) |

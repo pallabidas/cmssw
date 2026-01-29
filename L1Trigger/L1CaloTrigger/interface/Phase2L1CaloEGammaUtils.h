@@ -1267,7 +1267,6 @@ namespace p2eg {
           if( tmpphi < 60) {spare = spare | 3;}
           else {tmpphi = tmpphi - 60 ; spare = spare | 1 ;}
           ap_int<7> phivscenter = ap_int<7>(tmpphi - 30) ;
-	  //if (et > 100) std::cout<<"createDigitizedClusterCorrelator: "<<et<<"\t"<<abseta<<"\t"<<"tmpphi :"<<tmpphi<<"\t"<<"phivscenter: "<<phivscenter<<"\t"<<"nGCTCard: "<<nGCTCard<<"\t"<<"towPhi: "<<towPhi<<"\t"<<"corrTowPhiOffset: "<<corrTowPhiOffset<<"\t"<<"crPhi: "<<crPhi<<"\t"<<"globalToweriPhi(): "<<globalToweriPhi()<<"\t"<<"globalClusteriEta: "<<globalClusteriEta()<<"\t"<<"spare: "<<spare<<std::endl;
       return l1tp2::DigitizedClusterCorrelator(
           et,  // technically we are just multiplying and then dividing again by the LSB
           abseta,
