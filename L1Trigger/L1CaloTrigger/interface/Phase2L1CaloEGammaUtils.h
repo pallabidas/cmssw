@@ -1167,7 +1167,7 @@ namespace p2eg {
     }
 
     /* 
-       * Get GCT cluster's real eta from global iPhi (0-71*5).
+       * Get GCT cluster's real phi from global iPhi (0-71*5).
        */
     float realPhi(void) const {
       float size_cell = 2 * M_PI / (CRYSTALS_IN_TOWER_PHI * n_towers_Phi);
@@ -1257,28 +1257,31 @@ namespace p2eg {
      */
     l1tp2::DigitizedClusterCorrelator createDigitizedClusterCorrelator(const int corrTowPhiOffset) const {
 	  // Sascha eta and phi
-          //ap_uint<7> abseta = 0 ;
-	  ap_uint<8> abseta = 0 ;
+          ap_uint<7> abseta = 0 ;
           ap_uint<10> spare = 0 ;
-          if(globalClusteriEta()>85) {abseta = globalClusteriEta() - 85 ; spare = 4 ; }
-          else { abseta = 85 - globalClusteriEta() ; spare = 0 ; }
+          if (globalClusteriEta() > n_towers_cardEta*CRYSTALS_IN_TOWER_ETA) { abseta = globalClusteriEta() - n_towers_cardEta*CRYSTALS_IN_TOWER_ETA; spare = 4 ; }
+          else { abseta = n_towers_cardEta*CRYSTALS_IN_TOWER_ETA - globalClusteriEta() ; spare = 0 ; }
 
-          ap_int<8> tmpphi = (((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) + crPhi) ;
-          if( tmpphi < 60) {spare = spare | 3;}
-          else {tmpphi = tmpphi - 60 ; spare = spare | 1 ;}
-          ap_int<7> phivscenter = ap_int<7>(tmpphi - 30) ;
+          ap_int<8> tmpphi = (((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) + crPhi) ; // range between 0 to 120
+          if (tmpphi < PHI_RANGE_PER_SLR_DEGREES/2) {spare = spare | 3;}
+          else { tmpphi = tmpphi - PHI_RANGE_PER_SLR_DEGREES/2 ; spare = spare | 1 ;} // set to range between 0 to 60
+          ap_int<7> phivscenter = ap_int<7>(tmpphi - PHI_RANGE_PER_SLR_DEGREES/4) ; // set to range between -30 to 30
+
+	  ap_uint<6> shape = (0x3F * et2x5 / et5x5); // normalize to 0x3F
+	  ap_uint<3> quality = (standaloneWP() * std::pow(2, 0)) + (looseL1TkMatchWP() * std::pow(2, 1)) + (photonWP() * std::pow(2, 2));
+
       return l1tp2::DigitizedClusterCorrelator(
           et,  // technically we are just multiplying and then dividing again by the LSB
           abseta,
           phivscenter,
-          ap_uint<6>(0x3F) ,
-          ap_uint<6>(0x3F) ,
-          ap_uint<6>(0x3F) ,
-          ap_uint<3>(0x7) ,
+          ap_uint<6>(hoe & 0x3F) ,
+          ap_uint<6>(iso & 0x3F) ,
+          ap_uint<6>(shape) ,
+          ap_uint<3>(quality) ,
           ap_uint<5>(timing),
           ap_uint<2>(brems),
           ap_uint<10>(spare) ,
-          nGCTCard, true ) ;
+          nGCTCard) ;
     }
 
     /*

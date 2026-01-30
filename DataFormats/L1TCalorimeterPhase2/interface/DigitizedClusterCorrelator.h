@@ -47,9 +47,7 @@ namespace l1tp2 {
                                ap_uint<5> timing,
                                ap_uint<2> brems,
                                ap_uint<10> spare,
-                               int iGCTCard,
-                               bool fullydigitizedInputs) {
-      (void)fullydigitizedInputs;  // what is this?
+                               int iGCTCard) {
       clusterData = ((ap_uint<64>)pt) | (((ap_uint<64>)eta) << 12) | (((ap_uint<64>)(phi & 0x7F)) << 19) |
                     (((ap_uint<64>)hoe) << 26) | (((ap_uint<64>)iso) << 32) |
                     (((ap_uint<64>)shape) << 38) | (((ap_uint<64>)wp) << 44) | (((ap_uint<64>)timing) << 47) |
@@ -65,21 +63,19 @@ namespace l1tp2 {
     float ptFloat() const { return (pt() * ptLSB()); }
 
     // crystal eta in the correlator region (LSB: 2.8/170)
-    ap_uint<7> eta() const { return ((clusterData >> 12) & 0x7F); }  // (eight 1's) 0b11111111 = 0xFF   // not eight but seven?
+    ap_uint<7> eta() const { return ((clusterData >> 12) & 0x7F); }  // (seven 1's) 0b11111111 = 0x7F
 
     // crystal phi in the correlator region (LSB: 2pi/360)
-    ap_int<7> phi() const { return ((clusterData >> 19) & 0x7F); }  // (seven 1's) 0b1111111 = 0x7F
+    ap_int<7> phi() const { return ((clusterData >> 19) & 0x7F); }
 
     // HoE value and flag: not defined yet in the emulator 
-    ap_uint<6> hoe() const { return ((clusterData >> 26) & 0x3F); }      // (four 1's) 0b1111 = 0xF // split 6 bits in 4 and 2?
+    ap_uint<6> hoe() const { return ((clusterData >> 26) & 0x3F); }
 
-    // Raw isolation sum: not saved in the emulator
-    ap_uint<6> iso() const { return ((clusterData >> 32) & 0x3F); } // split 6 bits in 4 and 2? passes_iso and passes_looseTkiso defined in emulator?
+    ap_uint<6> iso() const { return ((clusterData >> 32) & 0x3F); } // raw isolation sum
 
-    ap_uint<6> shape() const { return ((clusterData >> 38) & 0x3F); } // shape flags not defined?
+    ap_uint<6> shape() const { return ((clusterData >> 38) & 0x3F); } // et2x5/et5x5
 
-    // wp: not saved in the current emulator
-    ap_uint<3> wp() const { return ((clusterData >> 44) & 0x7); } //passes_iso and passes_looseTkiso defined in emulator?
+    ap_uint<3> wp() const { return ((clusterData >> 44) & 0x7); } // encoded standaloneWP, looseL1TkMatchWP, photonWP
 
     // timing: not saved in the current emulator
     ap_uint<5> timing() const { return ((clusterData >> 47) & 0x1F); }

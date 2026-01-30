@@ -167,19 +167,18 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
         // The eta is already digitized, just needs to be converted from [0, +2*17*5) to [-17*5, +17*5)
         int temp_iEta_signed = clusterIn.eta() - (p2eg::CRYSTALS_IN_TOWER_ETA * p2eg::n_towers_per_link);
 
-	// Sascha eta and phi already implemented in digi collection in Phase2L1CaloEGammaUtils.h
+	// Sascha eta and phi already implemented in digi collection in Phase2L1CaloEGammaUtils.h --> but it is old geometry
 	// Need to adapt DigitizedClusterCorrelator to DigitizedClusterCorrelatorTM18 
 	l1tp2::GCTEmDigiCluster clusterOut = l1tp2::GCTEmDigiCluster(clusterIn.pt(),
                                                                      clusterIn.eta(),
                                                                      clusterIn.phi(),
-                                                                     ap_uint<6>(0x3F) ,
-                                                                     ap_uint<6>(0x3F) ,
-                                                                     ap_uint<6>(0x3F) ,
-                                                                     ap_uint<3>(0x7) ,
-                                                                     ap_uint<5>(0x1F),
-                                                                     ap_uint<2>(0x2),
-                                                                     ap_uint<10>(0x3FF) ,
-                                                                     0) ;
+								     clusterIn.hoe(),
+								     clusterIn.iso(),
+								     clusterIn.shape(),
+								     clusterIn.wp(),
+								     clusterIn.timing(),
+								     clusterIn.brems(),
+								     clusterIn.spare());
 
         // there is a 1-to-1 mapping between the original float clusters and the first step of digitization, so we can build a ref to the same cluster
         edm::Ref<l1tp2::CaloCrystalClusterCollection> thisRef(inputGCTClusters, iCluster);
@@ -250,7 +249,7 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
 
       // Check if this cluster falls into each GCT card
       float clusterRealPhiAsDegree = pfIn.clusterPhi() * 180 / M_PI;
-      float phiDifference = clusterRealPhiAsDegree - regionCentersInDegrees[iRegion];
+      float phiDifference = p2eg::deltaPhiInDegrees(clusterRealPhiAsDegree, regionCentersInDegrees[iRegion]);
       if (std::abs(phiDifference) < (p2eg::PHI_RANGE_PER_SLR_DEGREES / 4)) { // only unique region
         // For PFClusters, the method clusterEta returns a float, so we need to digitize this
         float eta_LSB = p2eg::ECAL_eta_range / (p2eg::N_GCTTOWERS_FIBER * p2eg::CRYSTALS_IN_TOWER_ETA);
@@ -285,10 +284,10 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
 	if(absphi>=-2.625 && absphi < -1.575) { phivscenter = absphi + 2.1 ; pf_phi = (ap_int<7>)(phivscenter/0.525*30) ; }
 
         // Initialize the new cluster
-	ap_uint<20> spare = 0 ;
+	ap_uint<36> spare = 0 ;
 	if(temp_iEta_signed < 0) spare = 4; // 3rd bit encode PosEta
 	ap_uint<12> pf_et = (ap_uint<12>)(pfIn.clusterEt() / p2eg::ECAL_LSB);
-	l1tp2::GCTHadDigiCluster pfOut = l1tp2::GCTHadDigiCluster(pf_et, pf_eta, pf_phi, pf_et, 0x3F, spare, 0);
+	l1tp2::GCTHadDigiCluster pfOut = l1tp2::GCTHadDigiCluster(pf_et, pf_eta, pf_phi, pf_et, 0x3F, spare);
 
         pfOut.setRef(edm::Ref<l1tp2::CaloPFClusterCollection>(inputPFClusters, iCluster));
 
