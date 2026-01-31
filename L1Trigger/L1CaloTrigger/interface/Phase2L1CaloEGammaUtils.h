@@ -1329,7 +1329,11 @@ namespace p2eg {
     inline float totalEtFloat() const {
       return ((float)et * ECAL_LSB);
     }  // Return total energy as a float (assuming the energy uses the ECAL LSB convention)
-    inline float ecalEtFloat() const { return ((float)ecalEt * ECAL_LSB); }  // Return ECAL energy as a float
+
+    inline float ecalEtFloat() const {
+      return ((float)ecalEt * ECAL_LSB);
+    }  // Return ECAL energy as a float
+
     inline float hcalEtFloat() const {
       return ((float)hcalEt * HCAL_LSB);
     }  // Return HCAL energy as a float, use HCAL LSB
@@ -1342,6 +1346,38 @@ namespace p2eg {
       hoe = rctTower.hoe;
       ecalEt = rctTower.ecalEt;
       hcalEt = rctTower.hcalEt;
+    }
+
+    void addHoverEToTower(ap_uint<12> ECAL, ap_uint<12> HCAL) {
+      ap_uint<4> hoeOut = 0;
+      ap_uint<1> hoeLSB = 0;
+      ap_uint<12> A;
+      ap_uint<12> B;
+
+      A = (ECAL > HCAL) ? ECAL : HCAL;
+      B = (ECAL > HCAL) ? HCAL : ECAL;
+
+      if (ECAL == 0 || HCAL == 0 || HCAL >= ECAL)
+        hoeLSB = 0;
+      else
+        hoeLSB = 1;
+      if (A > B) {
+        if (A > 2 * B)
+          hoeOut = 0x1;
+        if (A > 4 * B)
+          hoeOut = 0x2;
+        if (A > 8 * B)
+          hoeOut = 0x3;
+        if (A > 16 * B)
+          hoeOut = 0x4;
+        if (A > 32 * B)
+          hoeOut = 0x5;
+        if (A > 64 * B)
+          hoeOut = 0x6;
+        if (A > 128 * B)
+          hoeOut = 0x7;
+      }
+      hoe = hoeLSB | (hoeOut << 1);
     }
 
     /*
@@ -1421,8 +1457,8 @@ namespace p2eg {
        */
     l1tp2::CaloTower createCaloTowerFromFiberIdx(int nGCTCard, int iFiber, int iTowerInFiber) {
       l1tp2::CaloTower l1CaloTower;
-      l1CaloTower.setEcalTowerEt(ecalEtFloat());  // float: ECAL divide by 8.0
-      l1CaloTower.setHcalTowerEt(hcalEtFloat());  // float: HCAL multiply by LSB
+      l1CaloTower.setEcalTowerEt(ecalEtFloat());
+      l1CaloTower.setHcalTowerEt(hcalEtFloat());
       int global_tower_iEta = globalToweriEta(nGCTCard, iFiber, iTowerInFiber);
       int global_tower_iPhi = globalToweriPhi(nGCTCard, iFiber, iTowerInFiber);
       l1CaloTower.setTowerIEta(global_tower_iEta);
@@ -1437,9 +1473,8 @@ namespace p2eg {
      */
     l1tp2::CaloTower createFullTowerFromCardIdx(int nGCTCard, int gctCard_tower_iEta, int gctCard_tower_iPhi) {
       l1tp2::CaloTower l1CaloTower;
-      // Store total Et (HCAL+ECAL) in the ECAL Et member
-      l1CaloTower.setEcalTowerEt(totalEtFloat());
-      l1CaloTower.setHcalTowerEt(ecalEtFloat());
+      l1CaloTower.setEcalTowerEt(ecalEtFloat());
+      l1CaloTower.setHcalTowerEt(hcalEtFloat());
       int global_tower_iEta = globalToweriEtaFromGCTcardiEta(gctCard_tower_iEta);
       int global_tower_iPhi = globalToweriPhiFromGCTcardiPhi(nGCTCard, gctCard_tower_iPhi);
       l1CaloTower.setTowerIEta(global_tower_iEta);
