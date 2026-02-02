@@ -162,21 +162,21 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
       // Check if this cluster falls into each SLR region, i.e. if the cluster is within 120/2 = 60 degrees of the center of the SLR in phi
       float clusterRealPhiAsDegree = clusterIn.realPhi() * 180 / M_PI;
       float phiDifference = p2eg::deltaPhiInDegrees(clusterRealPhiAsDegree, regionCentersInDegrees[iRegion]);
-      if (std::abs(phiDifference) < (p2eg::PHI_RANGE_PER_SLR_DEGREES / 4)) { // only unique region
+      if (std::abs(phiDifference) < (p2eg::PHI_RANGE_PER_SLR_DEGREES / 4)) {  // only unique region
         // The eta is already digitized, just needs to be converted from [0, +2*17*5) to [-17*5, +17*5)
         int temp_iEta_signed = clusterIn.eta() - (p2eg::CRYSTALS_IN_TOWER_ETA * p2eg::n_towers_per_link);
 
-	// Need to adapt DigitizedClusterCorrelator to DigitizedClusterCorrelatorTM18 
-	l1tp2::GCTEmDigiCluster clusterOut = l1tp2::GCTEmDigiCluster(clusterIn.pt(),
+        // Need to adapt DigitizedClusterCorrelator to DigitizedClusterCorrelatorTM18
+        l1tp2::GCTEmDigiCluster clusterOut = l1tp2::GCTEmDigiCluster(clusterIn.pt(),
                                                                      clusterIn.eta(),
                                                                      clusterIn.phi(),
-								     clusterIn.hoe(),
-								     clusterIn.iso(),
-								     clusterIn.shape(),
-								     clusterIn.wp(),
-								     clusterIn.timing(),
-								     clusterIn.brems(),
-								     clusterIn.spare());
+                                                                     clusterIn.hoe(),
+                                                                     clusterIn.iso(),
+                                                                     clusterIn.shape(),
+                                                                     clusterIn.wp(),
+                                                                     clusterIn.timing(),
+                                                                     clusterIn.brems(),
+                                                                     clusterIn.spare());
 
         // there is a 1-to-1 mapping between the original float clusters and the first step of digitization, so we can build a ref to the same cluster
         edm::Ref<l1tp2::CaloCrystalClusterCollection> thisRef(inputGCTClusters, iCluster);
@@ -248,7 +248,7 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
       // Check if this cluster falls into each GCT card
       float clusterRealPhiAsDegree = pfIn.clusterPhi() * 180 / M_PI;
       float phiDifference = p2eg::deltaPhiInDegrees(clusterRealPhiAsDegree, regionCentersInDegrees[iRegion]);
-      if (std::abs(phiDifference) < (p2eg::PHI_RANGE_PER_SLR_DEGREES / 4)) { // only unique region
+      if (std::abs(phiDifference) < (p2eg::PHI_RANGE_PER_SLR_DEGREES / 4)) {  // only unique region
         // For PFClusters, the method clusterEta returns a float, so we need to digitize this
         float eta_LSB = p2eg::ECAL_eta_range / (p2eg::N_GCTTOWERS_FIBER * p2eg::CRYSTALS_IN_TOWER_ETA);
         int temp_iEta_signed = std::floor(pfIn.clusterEta() / eta_LSB);
@@ -266,21 +266,22 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
           continue;
         }
 
-	ap_uint<7> pf_eta = (ap_uint<7>)((abs(pfIn.clusterEta()) - (eta_LSB / 2)) / eta_LSB);
-	ap_int<7> pf_phi = 0x7F & int(std::floor(phiDifference)); // greatest integer <= x
+        ap_uint<7> pf_eta = (ap_uint<7>)((abs(pfIn.clusterEta()) - (eta_LSB / 2)) / eta_LSB);
+        ap_int<7> pf_phi = 0x7F & int(std::floor(phiDifference));  // greatest integer <= x
 
         // Initialize the new cluster
-	ap_uint<36> spare = 0 ;
-	if(temp_iEta_signed < 0) spare = 4; // 3rd bit encode PosEta
-	ap_uint<12> pf_et = (ap_uint<12>)(pfIn.clusterEt() / p2eg::ECAL_LSB);
-	ap_uint<12> pf_ecal = (ap_uint<12>)(pfIn.ecalEt() / p2eg::ECAL_LSB);
-	l1tp2::GCTHadDigiCluster pfOut = l1tp2::GCTHadDigiCluster(pf_et, pf_eta, pf_phi, pf_ecal, 0x3F, spare);
+        ap_uint<36> spare = 0;
+        if (temp_iEta_signed < 0)
+          spare = 4;  // 3rd bit encode PosEta
+        ap_uint<12> pf_et = (ap_uint<12>)(pfIn.clusterEt() / p2eg::ECAL_LSB);
+        ap_uint<12> pf_ecal = (ap_uint<12>)(pfIn.ecalEt() / p2eg::ECAL_LSB);
+        l1tp2::GCTHadDigiCluster pfOut = l1tp2::GCTHadDigiCluster(pf_et, pf_eta, pf_phi, pf_ecal, 0x3F, spare);
 
         pfOut.setRef(edm::Ref<l1tp2::CaloPFClusterCollection>(inputPFClusters, iCluster));
 
         // Check which RCT card this falls into, ordered 0, 1, 2, 3 counting from the most negative phi (real phi or iPhi) to the most positive
         // so RCT card 0 is -60 to -30 degrees in phi from the center, RCT card 1 is -30 to 0 degrees in phi from the center, RCT card 2 is 0 to +30 degrees in phi from the center, RCT card 3 is +30 to +60 degrees in phi from the center
-	
+
         int whichRCTcard = 0;
         if (phiDifference < -(p2eg::PHI_RANGE_PER_SLR_DEGREES / 4)) {
           whichRCTcard = 0;
@@ -400,7 +401,6 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
       out_had_GCT3_SLR1_negEta.push_back(buffer_had_GCT3_SLR1_negEta[iRCT][iCluster]);
       out_had_GCT3_SLR3_posEta.push_back(buffer_had_GCT3_SLR3_posEta[iRCT][iCluster]);
       out_had_GCT3_SLR3_negEta.push_back(buffer_had_GCT3_SLR3_negEta[iRCT][iCluster]);
-
     }
   }
 

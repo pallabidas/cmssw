@@ -14,27 +14,25 @@ namespace l1tp2 {
   class DigitizedCaloToCorrelatorTMI18 {
   private:
     // Data (to remove)
-    ap_uint<64> CardData[162] ;
+    ap_uint<64> CardData[162];
 
     GCTDigiClusterLink CardLink;
 
   public:
-
-    DigitizedCaloToCorrelatorTMI18() { 
-	    for (int i = 0; i < 162; i++) {
-		    CardData[i] = 0;
-	    }
+    DigitizedCaloToCorrelatorTMI18() {
+      for (int i = 0; i < 162; i++) {
+        CardData[i] = 0;
+      }
     }
     DigitizedCaloToCorrelatorTMI18(ap_uint<64> data[162], GCTDigiClusterLink link) {
-	    for (int i = 0; i < 162; i++) {
-		    CardData[i] = data[i];
-	    }
-	    CardLink = link;
+      for (int i = 0; i < 162; i++) {
+        CardData[i] = data[i];
+      }
+      CardLink = link;
     }
 
-    const ap_uint<64>*  dataCard() const { return CardData; }
+    const ap_uint<64>* dataCard() const { return CardData; }
     const GCTDigiClusterLink& linkCard() const { return CardLink; }
-
   };
 
   // Collection typedef

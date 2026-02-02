@@ -249,12 +249,13 @@ inline p2eg::GCTintTowers_t p2eg::getFullTowers(const p2eg::GCTinternal_t& GCTin
             if (eta == eta1 && phi == phi1) {
               GCTintTowers.GCTtower[eta][phi].et =
                   (GCTintTowers.GCTtower[eta][phi].et + GCTinternal.GCTCorrfiber[i + ic1].GCTclusters[jc].et);
-	      GCTintTowers.GCTtower[eta][phi].ecalEt =
-		  (GCTintTowers.GCTtower[eta][phi].ecalEt + GCTinternal.GCTCorrfiber[i + ic1].GCTclusters[jc].et);
+              GCTintTowers.GCTtower[eta][phi].ecalEt =
+                  (GCTintTowers.GCTtower[eta][phi].ecalEt + GCTinternal.GCTCorrfiber[i + ic1].GCTclusters[jc].et);
             }
           }
         }
-	GCTintTowers.GCTtower[eta][phi].addHoverEToTower(GCTintTowers.GCTtower[eta][phi].ecalEt, GCTintTowers.GCTtower[eta][phi].hcalEt);
+        GCTintTowers.GCTtower[eta][phi].addHoverEToTower(GCTintTowers.GCTtower[eta][phi].ecalEt,
+                                                         GCTintTowers.GCTtower[eta][phi].hcalEt);
       }
     }
   }
@@ -275,12 +276,13 @@ inline p2eg::GCTintTowers_t p2eg::getFullTowers(const p2eg::GCTinternal_t& GCTin
             if (eta == eta1 && phi == phi1) {
               GCTintTowers.GCTtower[eta][phi].et =
                   (GCTintTowers.GCTtower[eta][phi].et + GCTinternal.GCTCorrfiber[i + ic1].GCTclusters[jc].et);
-	      GCTintTowers.GCTtower[eta][phi].ecalEt =
+              GCTintTowers.GCTtower[eta][phi].ecalEt =
                   (GCTintTowers.GCTtower[eta][phi].ecalEt + GCTinternal.GCTCorrfiber[i + ic1].GCTclusters[jc].et);
             }
           }
         }
-	GCTintTowers.GCTtower[eta][phi].addHoverEToTower(GCTintTowers.GCTtower[eta][phi].ecalEt, GCTintTowers.GCTtower[eta][phi].hcalEt);
+        GCTintTowers.GCTtower[eta][phi].addHoverEToTower(GCTintTowers.GCTtower[eta][phi].ecalEt,
+                                                         GCTintTowers.GCTtower[eta][phi].hcalEt);
       }
     }
   }

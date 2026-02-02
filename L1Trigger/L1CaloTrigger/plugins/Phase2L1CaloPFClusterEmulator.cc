@@ -103,7 +103,7 @@ void Phase2L1CaloPFClusterEmulator::produce(edm::Event& iEvent, const edm::Event
     realPhi[ieta][iphi] = i.towerPhi();
   }
 
-  std::pair <float, float> regions[nSLR][nTowerEtaSLR][nTowerPhiSLR];
+  std::pair<float, float> regions[nSLR][nTowerEtaSLR][nTowerPhiSLR];
 
   for (int ieta = 0; ieta < nTowerEtaSLR; ieta++) {
     for (int iphi = 0; iphi < nTowerPhiSLR; iphi++) {
@@ -119,26 +119,32 @@ void Phase2L1CaloPFClusterEmulator::produce(edm::Event& iEvent, const edm::Event
     for (int iphi = 0; iphi < nTowerPhiSLR; iphi++) {
       if (ieta > 1) {
         if (iphi > 1)
-          regions[0][ieta][iphi] = std::make_pair(GCTintTowers[ieta - 2][iphi - 2], GCTintTowersEcal[ieta - 2][iphi - 2]);
+          regions[0][ieta][iphi] =
+              std::make_pair(GCTintTowers[ieta - 2][iphi - 2], GCTintTowersEcal[ieta - 2][iphi - 2]);
         for (int k = 1; k < 17; k++) {
-          regions[k * 2][ieta][iphi] = std::make_pair(GCTintTowers[ieta - 2][iphi + k * 4 - 2], GCTintTowersEcal[ieta - 2][iphi + k * 4 - 2]);
+          regions[k * 2][ieta][iphi] =
+              std::make_pair(GCTintTowers[ieta - 2][iphi + k * 4 - 2], GCTintTowersEcal[ieta - 2][iphi + k * 4 - 2]);
         }
         if (iphi < 6)
-          regions[34][ieta][iphi] = std::make_pair(GCTintTowers[ieta - 2][iphi + 66], GCTintTowersEcal[ieta - 2][iphi + 66]);
+          regions[34][ieta][iphi] =
+              std::make_pair(GCTintTowers[ieta - 2][iphi + 66], GCTintTowersEcal[ieta - 2][iphi + 66]);
       }
       if (ieta < 19) {
         if (iphi > 1)
-          regions[1][ieta][iphi] = std::make_pair(GCTintTowers[ieta + 15][iphi - 2], GCTintTowersEcal[ieta + 15][iphi - 2]);
+          regions[1][ieta][iphi] =
+              std::make_pair(GCTintTowers[ieta + 15][iphi - 2], GCTintTowersEcal[ieta + 15][iphi - 2]);
         for (int k = 1; k < 17; k++) {
-          regions[k * 2 + 1][ieta][iphi] = std::make_pair(GCTintTowers[ieta + 15][iphi + k * 4 - 2], GCTintTowersEcal[ieta + 15][iphi + k * 4 - 2]);
+          regions[k * 2 + 1][ieta][iphi] =
+              std::make_pair(GCTintTowers[ieta + 15][iphi + k * 4 - 2], GCTintTowersEcal[ieta + 15][iphi + k * 4 - 2]);
         }
         if (iphi < 6)
-          regions[35][ieta][iphi] = std::make_pair(GCTintTowers[ieta + 15][iphi + 66], GCTintTowersEcal[ieta + 15][iphi + 66]);
+          regions[35][ieta][iphi] =
+              std::make_pair(GCTintTowers[ieta + 15][iphi + 66], GCTintTowersEcal[ieta + 15][iphi + 66]);
       }
     }
   }
 
-  std::pair <float, float> temporary[nTowerEtaSLR][nTowerPhiSLR];
+  std::pair<float, float> temporary[nTowerEtaSLR][nTowerPhiSLR];
   int etaoffset = 0;
   int phioffset = 0;
 

@@ -29,19 +29,19 @@ namespace l1tp2 {
     GCTEmDigiCluster(ap_uint<64> data) { clusterData = data; }
 
     GCTEmDigiCluster(ap_uint<12> pt,
-                               ap_uint<7> eta,
-                               ap_int<7> phi,
-                               ap_uint<6> hoe,
-                               ap_uint<6> iso,
-                               ap_uint<6> shape,
-                               ap_uint<3> wp,
-                               ap_uint<5> timing,
-                               ap_uint<2> brems,
-                               ap_uint<10> spare) {
+                     ap_uint<7> eta,
+                     ap_int<7> phi,
+                     ap_uint<6> hoe,
+                     ap_uint<6> iso,
+                     ap_uint<6> shape,
+                     ap_uint<3> wp,
+                     ap_uint<5> timing,
+                     ap_uint<2> brems,
+                     ap_uint<10> spare) {
       clusterData = ((ap_uint<64>)pt) | (((ap_uint<64>)eta) << 12) | (((ap_uint<64>)phi) << 19) |
-                    (((ap_uint<64>)hoe) << 26) | (((ap_uint<64>)iso) << 32) |
-                    (((ap_uint<64>)shape) << 38) | (((ap_uint<64>)wp) << 44) | (((ap_uint<64>)timing) << 47) |
-                    (((ap_uint<64>)brems << 52)) | (((ap_uint<64>)spare << 54));
+                    (((ap_uint<64>)hoe) << 26) | (((ap_uint<64>)iso) << 32) | (((ap_uint<64>)shape) << 38) |
+                    (((ap_uint<64>)wp) << 44) | (((ap_uint<64>)timing) << 47) | (((ap_uint<64>)brems << 52)) |
+                    (((ap_uint<64>)spare << 54));
     }
 
     // Setters
@@ -65,7 +65,7 @@ namespace l1tp2 {
 
     // crystal phi (signed, 7 bits), relative to center of the SLR
     // to convert to real phi, need to know which SLR this cluster is in
-    ap_int<7> phi() const { return ((clusterData >> 19) & 0x7F); } 
+    ap_int<7> phi() const { return ((clusterData >> 19) & 0x7F); }
 
     // HoE value: not defined for EG cluster
     ap_uint<6> hoe() const { return ((clusterData >> 26) & 0x3F); }
@@ -84,7 +84,7 @@ namespace l1tp2 {
     // Brem information from RCT
     ap_uint<2> brems() const { return ((clusterData >> 52) & 0x3); }
 
-    // Encoding region information 
+    // Encoding region information
     ap_uint<10> spare() const { return ((clusterData >> 54) & 0x3FF); }
 
     // Get the underlying float cluster

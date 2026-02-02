@@ -24,19 +24,14 @@ namespace l1tp2 {
 
     GCTHadDigiCluster(ap_uint<64> data) { clusterData = data; }
 
-    GCTHadDigiCluster(ap_uint<12> pt,
-                               ap_uint<7> eta,
-                               ap_int<7> phi,
-                               ap_uint<12> ecal,
-                               ap_uint<6> fb,
-                               ap_uint<36> spare) {
+    GCTHadDigiCluster(
+        ap_uint<12> pt, ap_uint<7> eta, ap_int<7> phi, ap_uint<12> ecal, ap_uint<6> fb, ap_uint<36> spare) {
       clusterData = ((ap_uint<64>)pt) | (((ap_uint<64>)eta) << 12) | (((ap_uint<64>)phi) << 19) |
-                    (((ap_uint<64>)ecal) << 26) | (((ap_uint<64>)fb) << 38) |
-                    (((ap_uint<64>)spare << 44));
+                    (((ap_uint<64>)ecal) << 26) | (((ap_uint<64>)fb) << 38) | (((ap_uint<64>)spare << 44));
     }
 
     // Setters
-    void setRef(const edm::Ref<l1tp2::CaloPFClusterCollection> &clusterRef) { clusterRef_ = clusterRef; }
+    void setRef(const edm::Ref<l1tp2::CaloPFClusterCollection>& clusterRef) { clusterRef_ = clusterRef; }
     // Getters
     ap_uint<64> data() const { return clusterData; }
 
@@ -55,7 +50,7 @@ namespace l1tp2 {
 
     ap_uint<6> fb() const { return ((clusterData >> 38) & 0x3F); }
 
-    // Encoding region information 
+    // Encoding region information
     ap_uint<36> spare() const { return ((clusterData >> 44) & 0xFFFFF); }
 
     // Get the underlying ref

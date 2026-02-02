@@ -14,7 +14,7 @@ namespace l1tp2 {
     CaloPFCluster()
         : l1t::L1Candidate(),
           clusterEt_(0.),
-	  ecalEt_(0.),
+          ecalEt_(0.),
           clusterIEta_(-99),
           clusterIPhi_(-99),
           clusterEta_(-99.),
@@ -22,14 +22,14 @@ namespace l1tp2 {
 
     CaloPFCluster(const PolarLorentzVector& p4,
                   float clusterEt,
-		  float ecalEt,
+                  float ecalEt,
                   int clusterIEta,
                   int clusterIPhi,
                   float clusterEta,
                   float clusterPhi)
         : l1t::L1Candidate(p4),
           clusterEt_(clusterEt),
-	  ecalEt_(ecalEt),
+          ecalEt_(ecalEt),
           clusterIEta_(clusterIEta),
           clusterIPhi_(clusterIPhi),
           clusterEta_(clusterEta),

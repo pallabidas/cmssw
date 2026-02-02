@@ -1,11 +1,9 @@
 #ifndef Phase2L1CaloToCorrelatorTMI18_H
 #define Phase2L1CaloToCorrelatorTMI18_H
 
-
 // system include files
 #include <memory>
 #include <unistd.h>
-
 
 #include <iostream>
 #include <fstream>

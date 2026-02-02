@@ -49,9 +49,9 @@ namespace l1tp2 {
                                ap_uint<10> spare,
                                int iGCTCard) {
       clusterData = ((ap_uint<64>)pt) | (((ap_uint<64>)eta) << 12) | (((ap_uint<64>)(phi & 0x7F)) << 19) |
-                    (((ap_uint<64>)hoe) << 26) | (((ap_uint<64>)iso) << 32) |
-                    (((ap_uint<64>)shape) << 38) | (((ap_uint<64>)wp) << 44) | (((ap_uint<64>)timing) << 47) |
-                    (((ap_uint<64>)brems) << 52) | (((ap_uint<64>)spare) << 54);
+                    (((ap_uint<64>)hoe) << 26) | (((ap_uint<64>)iso) << 32) | (((ap_uint<64>)shape) << 38) |
+                    (((ap_uint<64>)wp) << 44) | (((ap_uint<64>)timing) << 47) | (((ap_uint<64>)brems) << 52) |
+                    (((ap_uint<64>)spare) << 54);
       idxGCTCard = iGCTCard;
     }
 
@@ -68,14 +68,14 @@ namespace l1tp2 {
     // crystal phi in the correlator region (LSB: 2pi/360)
     ap_int<7> phi() const { return ((clusterData >> 19) & 0x7F); }
 
-    // HoE value and flag: not defined yet in the emulator 
+    // HoE value and flag: not defined yet in the emulator
     ap_uint<6> hoe() const { return ((clusterData >> 26) & 0x3F); }
 
-    ap_uint<6> iso() const { return ((clusterData >> 32) & 0x3F); } // raw isolation sum
+    ap_uint<6> iso() const { return ((clusterData >> 32) & 0x3F); }  // raw isolation sum
 
-    ap_uint<6> shape() const { return ((clusterData >> 38) & 0x3F); } // et2x5/et5x5
+    ap_uint<6> shape() const { return ((clusterData >> 38) & 0x3F); }  // et2x5/et5x5
 
-    ap_uint<3> wp() const { return ((clusterData >> 44) & 0x7); } // encoded standaloneWP, looseL1TkMatchWP, photonWP
+    ap_uint<3> wp() const { return ((clusterData >> 44) & 0x7); }  // encoded standaloneWP, looseL1TkMatchWP, photonWP
 
     // timing: not saved in the current emulator
     ap_uint<5> timing() const { return ((clusterData >> 47) & 0x1F); }
@@ -106,14 +106,16 @@ namespace l1tp2 {
 
       int tmpphi = (phi() + PHI_RANGE_PER_SLR_DEGREES / 4);
       bool wrapped = !((spare() & 0x2) == 0);
-      if (wrapped) { tmpphi += PHI_RANGE_PER_SLR_DEGREES / 2; }
+      if (wrapped) {
+        tmpphi += PHI_RANGE_PER_SLR_DEGREES / 2;
+      }
       int thisPhi = (tmpphi + (offset_tower * n_crystals_in_tower));
-      if (thisPhi > 180) thisPhi -= 360; // range between -180 to 180 degrees
+      if (thisPhi > 180)
+        thisPhi -= 360;  // range between -180 to 180 degrees
 
       // LSB_PHI/2 is to add half a crystal width to get the center of the crystal in phi
       return (float)((thisPhi * LSB_PHI) + (LSB_PHI / 2));
     }
-
   };
 
   // Collection typedef
