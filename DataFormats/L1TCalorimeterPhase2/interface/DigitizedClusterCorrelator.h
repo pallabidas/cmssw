@@ -20,16 +20,16 @@ namespace l1tp2 {
     static constexpr float ETA_RANGE_ONE_SIDE = 1.4841;  // barrel goes from (-1.4841, +1.4841)
     static constexpr float LSB_ETA = ((2 * ETA_RANGE_ONE_SIDE) / (n_towers_eta * n_crystals_in_tower));  // (2.8 / 170)
     static constexpr float LSB_PHI = ((2 * M_PI) / (3 * n_towers_phi * n_crystals_in_tower));            // (2 pi * 360)
+    static constexpr float PHI_RANGE_PER_SLR_DEGREES = 120;
 
     static constexpr unsigned int n_bits_pt = 12;            // 12 bits allocated for pt
     static constexpr unsigned int n_bits_unused_start = 63;  // unused bits start at bit 63
 
     // "top" of the correlator card #0 in GCT coordinates is iPhi tower index 24
-    // Pallabi: changed offset values to correctly calculate realPhi() following L1Trigger/L1CaloTrigger/interface/Phase2L1CaloEGammaUtils.h
-    static constexpr int correlatorCard0_tower_iphi_offset = 20;
+    static constexpr int correlatorCard0_tower_iphi_offset = 68;
     // same but for correlator cards #1 and 2 (cards wrap around phi = 180 degrees):
-    static constexpr int correlatorCard1_tower_iphi_offset = 44;
-    static constexpr int correlatorCard2_tower_iphi_offset = 68;
+    static constexpr int correlatorCard1_tower_iphi_offset = 20;
+    static constexpr int correlatorCard2_tower_iphi_offset = 44;
 
   public:
     DigitizedClusterCorrelator() { clusterData = 0x0; }
@@ -86,8 +86,7 @@ namespace l1tp2 {
     ap_uint<10> spare() const { return ((clusterData >> 54) & 0x3FF); }
 
     // which GCT card (0, 1, or 2)
-    // Pallabi: this is currently set incorrectly in L1Trigger/L1CaloTrigger/plugins/Phase2L1CaloEGammaEmulator.cc so only use it to get realPhi()
-    //unsigned int cardNumber() const { return idxGCTCard; }
+    unsigned int cardNumber() const { return idxGCTCard; }
 
     // Get real eta (does not depend on card number). crystal iEta = 0 starts at real eta -1.4841.
     // LSB_ETA/2 is to add half a crystal width to get the center of the crystal in eta
@@ -97,47 +96,23 @@ namespace l1tp2 {
     float realPhi() const {
       // each card starts at a different real phi
       int offset_tower = 0;
-      if (idxGCTCard == 0) {
+      if (cardNumber() == 0) {
         offset_tower = correlatorCard0_tower_iphi_offset;
-      } else if (idxGCTCard == 1) {
+      } else if (cardNumber() == 1) {
         offset_tower = correlatorCard1_tower_iphi_offset;
-      } else if (idxGCTCard == 2) {
+      } else if (cardNumber() == 2) {
         offset_tower = correlatorCard2_tower_iphi_offset;
       }
 
-      int thisPhi = (phi() + 30); // add back the offset from L1Trigger/L1CaloTrigger/interface/Phase2L1CaloEGammaUtils.h 
-      int tmpphi = thisPhi;
-      bool wrapped = ((spare() & 0x2) == 0);
-      if (wrapped) { tmpphi = thisPhi + 60; } // add back the offset from L1Trigger/L1CaloTrigger/interface/Phase2L1CaloEGammaUtils.h
-      int crPhi = 0;
-      if (phi() < 0) crPhi = (30 + phi()) % 5;
-      else crPhi = phi() % 5;
-      int towPhi = (tmpphi - crPhi) / 5  + 4; // corrTowPhiOffset = 4
+      int tmpphi = (phi() + PHI_RANGE_PER_SLR_DEGREES / 4);
+      bool wrapped = !((spare() & 0x2) == 0);
+      if (wrapped) { tmpphi += PHI_RANGE_PER_SLR_DEGREES / 2; }
+      int thisPhi = (tmpphi + (offset_tower * n_crystals_in_tower));
+      if (thisPhi > 180) thisPhi -= 360; // range between -180 to 180 degrees
 
-      int iPhi_in_gctCard = (towPhi * 5) + crPhi;
-      int globalClusteriPhi = (offset_tower * 5 + iPhi_in_gctCard) % (5 * 72); // CRYSTALS_IN_TOWER_PHI * n_towers_phi
-      float size_cell = 2 * M_PI / (5 * 72); // CRYSTALS_IN_TOWER_PHI * n_towers_phi
-      return globalClusteriPhi * size_cell - M_PI + 0.00873; // half_crystal_size = 0.00873
+      // LSB_PHI/2 is to add half a crystal width to get the center of the crystal in phi
+      return (float)((thisPhi * LSB_PHI) + (LSB_PHI / 2));
     }
-
-    // which GCT card (0, 1, or 2)
-    unsigned int cardNumber() const {
-      float phiInDegrees = realPhi()* 180 / M_PI + 180;
-      int cardnumber = 0;
-      if (phiInDegrees > 160 && phiInDegrees < 280) cardnumber = 0;
-      if ((phiInDegrees > 280 && phiInDegrees < 360) || phiInDegrees < 40) cardnumber = 1;
-      if (phiInDegrees > 40 && phiInDegrees < 160) cardnumber = 2;
-      return cardnumber;
-    }
-
-    unsigned int slrNumber() const {
-      float phiInDegrees = realPhi()* 180 / M_PI + 180;
-      int slrnumber = 3;
-      if (cardNumber() == 0 && phiInDegrees > 220) slrnumber = 1;
-      if (cardNumber() == 1 && (phiInDegrees > 340 || phiInDegrees < 40)) slrnumber = 1;
-      if (cardNumber() == 2 && phiInDegrees > 100) slrnumber = 1;
-      return slrnumber;
-     }
 
   };
 

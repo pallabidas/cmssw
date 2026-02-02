@@ -53,7 +53,6 @@ namespace p2eg {
   static constexpr int CRYSTAL_IN_PHI = 20;  // number of crystals in phi, in one 3x4 region (barrel)
 
   static constexpr float ECAL_eta_range = 1.4841;
-  static constexpr float half_crystal_size = 0.00873;
 
   static constexpr float slideIsoPtThreshold = 80;
   static constexpr float a0_80 = 0.85, a1_80 = 0.0080, a0 = 0.21;                        // passes_iso
@@ -88,6 +87,8 @@ namespace p2eg {
   static constexpr int N_GCTETA = 34;
   static constexpr int N_GCTPHI = 36;
 
+  // Note: this follows old GCT geometry, where each GCT has 8 RCT cards (6 unique) with each RCT having 4 towers in phi
+  // leading to the offset of 6*4 = 24 towers between two GCT card boundaries
   // for emulator: "top" of the GCT card in phi is tower idx 20, for GCT card #0:
   static constexpr int GCTCARD_0_TOWER_IPHI_OFFSET = 20;
   // same but for GCT cards #1 and 2 (cards wrap around phi = 180 degrees):
@@ -102,6 +103,20 @@ namespace p2eg {
   static const int N_PF_CLUSTERS_PER_RCT_CARD = 6; // each eta side
   // Height of one SLR region in phi in degrees
   static constexpr float PHI_RANGE_PER_SLR_DEGREES = 120; // including overlap
+
+  // Returns the difference in the azimuth coordinates of phi1 and phi2 (all in degrees not radians), taking the wrap-around at 180 degrees into account
+  inline float deltaPhiInDegrees(float phi1, float phi2, const float c = 180) {
+     float r = std::fmod(phi1 - phi2, 2.0 * c);
+     if (r < -c) {
+       r += 2.0 * c;
+     } else if (r > c) {
+       r -= 2.0 * c;
+     }
+     return r;
+   }
+
+  // For a given phi in degrees (e.g. computed from some difference), return the phi (in degrees) which takes the wrap-around at 180 degrees into account
+  inline float wrappedPhiInDegrees(float phi) { return p2eg::deltaPhiInDegrees(phi, 0); }
 
   //////////////////////////////////////////////////////////////////////////
   // RCT: indexing helper functions
@@ -857,13 +872,13 @@ namespace p2eg {
     // Get real eta
     const float realEta(int cc) {
       float size_cell = 2 * ECAL_eta_range / (CRYSTALS_IN_TOWER_ETA * n_towers_Eta);
-      return crystaliEtaFromCardRegionInfo(cc) * size_cell - ECAL_eta_range + half_crystal_size;
+      return crystaliEtaFromCardRegionInfo(cc) * size_cell - ECAL_eta_range + (size_cell / 2);
     }
 
     // Get real phi
     const float realPhi(int cc) {
       float size_cell = 2 * M_PI / (CRYSTALS_IN_TOWER_PHI * n_towers_Phi);
-      return crystaliPhiFromCardRegionInfo(cc) * size_cell - M_PI + half_crystal_size;
+      return crystaliPhiFromCardRegionInfo(cc) * size_cell - M_PI + (size_cell / 2);
     }
 
     // Print info
@@ -1163,7 +1178,7 @@ namespace p2eg {
        */
     float realEta(void) const {
       float size_cell = 2 * ECAL_eta_range / (CRYSTALS_IN_TOWER_ETA * n_towers_Eta);
-      return globalClusteriEta() * size_cell - ECAL_eta_range + half_crystal_size;
+      return globalClusteriEta() * size_cell - ECAL_eta_range + (size_cell / 2);
     }
 
     /* 
@@ -1171,7 +1186,7 @@ namespace p2eg {
        */
     float realPhi(void) const {
       float size_cell = 2 * M_PI / (CRYSTALS_IN_TOWER_PHI * n_towers_Phi);
-      return globalClusteriPhi() * size_cell - M_PI + half_crystal_size;
+      return globalClusteriPhi() * size_cell - M_PI + (size_cell / 2);
     }
 
     /* 
@@ -1256,16 +1271,34 @@ namespace p2eg {
      * unique to each GCT card.
      */
     l1tp2::DigitizedClusterCorrelator createDigitizedClusterCorrelator(const int corrTowPhiOffset) const {
-	  // Sascha eta and phi
           ap_uint<7> abseta = 0 ;
           ap_uint<10> spare = 0 ;
           if (globalClusteriEta() > n_towers_cardEta*CRYSTALS_IN_TOWER_ETA) { abseta = globalClusteriEta() - n_towers_cardEta*CRYSTALS_IN_TOWER_ETA; spare = 4 ; }
           else { abseta = n_towers_cardEta*CRYSTALS_IN_TOWER_ETA - globalClusteriEta() ; spare = 0 ; }
 
-          ap_int<8> tmpphi = (((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) + crPhi) ; // range between 0 to 120
-          if (tmpphi < PHI_RANGE_PER_SLR_DEGREES/2) {spare = spare | 3;}
-          else { tmpphi = tmpphi - PHI_RANGE_PER_SLR_DEGREES/2 ; spare = spare | 1 ;} // set to range between 0 to 60
-          ap_int<7> phivscenter = ap_int<7>(tmpphi - PHI_RANGE_PER_SLR_DEGREES/4) ; // set to range between -30 to 30
+	  //// Use towPhi to determine relative phi when clusters are assigned to corect GCT card
+          //ap_int<8> tmpphi = (((towPhi - corrTowPhiOffset) * CRYSTALS_IN_TOWER_PHI) + crPhi) ; // range between 0 to 120
+          //if (tmpphi < PHI_RANGE_PER_SLR_DEGREES/2) {spare = spare | 3;}
+          //else { tmpphi = tmpphi - PHI_RANGE_PER_SLR_DEGREES/2 ; spare = spare | 1 ;} // set to range between 0 to 60
+          //ap_int<7> phivscenter = ap_int<7>(tmpphi - PHI_RANGE_PER_SLR_DEGREES/4) ; // set to range between -30 to 30
+
+	  // Use realPhi() to determine relative phi as current GCT card assignment uses old geometry
+          // This is emulator specific to bypass geometry issue
+	  int cardnumber = 0;
+	  float regionCentersInDegrees[6] = {10.0, 70.0, 130.0, -170.0, -110.0, -50.0};
+	  float clusterRealPhiAsDegree = realPhi() * 180 / M_PI;
+	  ap_int<7> phivscenter = 0;
+	  for (int i = 0; i < 6; i++) {
+	    float tempDifference = p2eg::deltaPhiInDegrees(clusterRealPhiAsDegree, regionCentersInDegrees[i]);
+	    if (abs(tempDifference) < PHI_RANGE_PER_SLR_DEGREES/4) {
+	      phivscenter = 0x7F & int(std::floor(tempDifference)); // greatest integer <= x
+	      cardnumber = int(i/2); 
+	    }
+	  }
+
+	  float cardCentersInDegrees[3] = {40., 160., -80.};
+	  if (p2eg::deltaPhiInDegrees(clusterRealPhiAsDegree, cardCentersInDegrees[cardnumber]) > 0) {spare = spare | 3;}
+	  else {spare = spare | 1 ;}
 
 	  ap_uint<6> shape = (0x3F * et2x5 / et5x5); // normalize to 0x3F
 	  ap_uint<3> quality = (standaloneWP() * std::pow(2, 0)) + (looseL1TkMatchWP() * std::pow(2, 1)) + (photonWP() * std::pow(2, 2));
@@ -1281,7 +1314,7 @@ namespace p2eg {
           ap_uint<5>(timing),
           ap_uint<2>(brems),
           ap_uint<10>(spare) ,
-          nGCTCard) ;
+          cardnumber) ;
     }
 
     /*
@@ -1716,12 +1749,6 @@ namespace p2eg {
       int fiberEnd,
       int corrFiberIndexOffset,
       int corrTowPhiOffset);
-
-  /*******************************************************************************************/
-  /* Interface to correlator helper functions (defined in Phase2L1CaloBarrelToCorrelator.h)  */
-  /*******************************************************************************************/
-  float deltaPhiInDegrees(float phi1, float phi2, const float c);
-  float wrappedPhiInDegrees(float phi);
 
   /*
    * Generic function to compare hadronic (had) or EM digi clusters.
