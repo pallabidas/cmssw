@@ -107,7 +107,7 @@ namespace p2eg {
   // Returns the difference in the azimuth coordinates of phi1 and phi2 (all in degrees not radians), taking the wrap-around at 180 degrees into account
   inline float deltaPhiInDegrees(float phi1, float phi2, const float c = 180) {
     float r = std::fmod(phi1 - phi2, 2.0 * c);
-    if (r < -c) {
+    if (r <= -c) {
       r += 2.0 * c;
     } else if (r > c) {
       r -= 2.0 * c;
@@ -1274,10 +1274,10 @@ namespace p2eg {
       ap_uint<7> abseta = 0;
       ap_uint<10> spare = 0;
       if (globalClusteriEta() >= n_towers_cardEta * CRYSTALS_IN_TOWER_ETA) {
-        abseta = globalClusteriEta() - n_towers_cardEta * CRYSTALS_IN_TOWER_ETA; // 0 to 84
+        abseta = globalClusteriEta() - n_towers_cardEta * CRYSTALS_IN_TOWER_ETA;  // 0 to 84
         spare = 4;
       } else {
-        abseta = n_towers_cardEta * CRYSTALS_IN_TOWER_ETA + 1 - globalClusteriEta(); // 84 to 0
+        abseta = n_towers_cardEta * CRYSTALS_IN_TOWER_ETA + 1 - globalClusteriEta();  // 84 to 0
         spare = 0;
       }
 
