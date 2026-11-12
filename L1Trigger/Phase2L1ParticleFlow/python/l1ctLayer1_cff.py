@@ -56,8 +56,8 @@ l1tLayer1Barrel = cms.EDProducer("L1TCorrelatorLayer1Producer",
         gctHadCorrector = cms.string("L1Trigger/Phase2L1ParticleFlow/data/hadcorr_barrel.root"),
         gctHadResol = cms.PSet(
 			etaBins = cms.vdouble( 0.700,  1.200,  1.600),
-			offset  = cms.vdouble( 3.675,  2.694,  1.640),
-			scale   = cms.vdouble( 0.121,  0.156,  0.292),
+			offset  = cms.vdouble( 0.359, -0.152,  7.364),
+			scale   = cms.vdouble( 0.171,  0.251,  0.136),
 			kind    = cms.string('calo'),
         ),
     ),
@@ -119,7 +119,7 @@ l1tLayer1Barrel = cms.EDProducer("L1TCorrelatorLayer1Producer",
     ),
     tkEgSorterAlgo = cms.string("Barrel"),
     tkEgSorterParameters = tkEgSorterParameters.clone(
-        nObjToSort = 16
+        nObjToSort = 10
     ),
     # these are the sectors for the logical "decoded" clusters; 
     caloSectors = cms.VPSet(
